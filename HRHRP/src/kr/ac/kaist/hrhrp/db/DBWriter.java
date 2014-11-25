@@ -18,11 +18,17 @@ public class DBWriter {
 	private final String SELECT_IMAGE_SQL = "SELECT path FROM Photo WHERE state = 0 LIMIT ?";
 	private final String INSERT_IMAGE_INFO_SQL = "INSERT INTO Photo (path, taken_at, latitude, longitude, owner_id) VALUES (?, ?, ? ,?, ?)";
 	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE path = ?";
+	
 	private final String INSERT_PERSON_INFO_SQL = "INSERT INTO Person (person_id, name) VALUES (?, ?)";
 	private final String INSERT_PERSON_RELATION_SQL = "INSERT INTO PersonPerson (owner_id, person_id, relationship) VALUES (?, ?, ?)";
+	private final String UPDATE_PERSON_NAME_SQL = "UPDATE Person SET name = ? WHERE person_id = ?";
+	private final String SELECT_NEW_PERSON_SQL = "SELECT Person.person_id from PersonPerson INNER JOIN Person ON PersonPerson.person_id = Person.person_id where owner_id = ? and Person.name is NULL";
+	private final String SELECT_NEW_PERSON_RELATION_SQL = "SELECT Person.person_id FROM PersonPerson INNER JOIN Person ON PersonPerson.person_id = Person.person_id WHERE owner_id = ? and PersonPerson.relationship is NULL";
+	private final String UPDATE_PERSON_RELATION_SQL = "UPDATE PersonPerson SET relationship = ? WHERE owner_id = ? and person_id = ?";
+	
 	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id) VALUES (?, ?)";
 	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE path = ?";
-	private final String SELECT_NEW_PERSON_SQL = "SELECT Person.person_id from PersonPerson INNER JOIN Person ON PersonPerson.person_id = Person.person_id where owner_id = ? and Person.name is NULL";
+	
 	
 	public DBWriter() {
 		init();
@@ -84,8 +90,18 @@ public class DBWriter {
 		}
 	}
 	
-	public void updatePersonName() {
-		// TODO Update Person Name
+	public void updatePersonName(String personName, String personId) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_PERSON_NAME_SQL);
+			ps.setString(1, personName);
+			ps.setString(2, personId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void insertPersonInfo(String personId, String personName) {
@@ -105,7 +121,6 @@ public class DBWriter {
 	}
 	
 	public ArrayList<String> selectNewPersons(String ownerId) {
-		//TODO select new persons from ownerId
 		ArrayList<String> newPersons = new ArrayList<String>();
 		PreparedStatement ps;
 		try {
@@ -125,8 +140,39 @@ public class DBWriter {
 		return newPersons;
 	}
 	
-	public void updatePersonRelation() {
-		// TODO UPDATE PERSON RELATION
+	public ArrayList<String> selectNewPersonRelations(String ownerId) {
+		ArrayList<String> newPersons = new ArrayList<String>();
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(SELECT_NEW_PERSON_RELATION_SQL);
+			ps.setString(1, ownerId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				String imageUrl = rs.getString(1);
+				newPersons.add(imageUrl);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return newPersons;
+	}
+	
+	public void updatePersonRelation(String ownerId, String personId, String relation) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_PERSON_RELATION_SQL);
+			ps.setString(1, relation);
+			ps.setString(2, ownerId);
+			ps.setString(3, personId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void insertPersonRelation(String ownerId, String personId, String relation) {

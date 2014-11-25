@@ -1,10 +1,10 @@
 package kr.ac.kaist.hrhrp;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import kr.ac.kaist.hrhrp.FaceRecognition;
 import kr.ac.kaist.hrhrp.db.DBWriter;
 import kr.ac.kaist.hrhrp.type.Image;
-import kr.ac.kaist.hrhrp.type.Init;
 import kr.ac.kaist.hrhrp.type.Person;
 
 public class Extractor {
@@ -46,15 +46,40 @@ public class Extractor {
 	
 	public void updateNewPersons(String onwerId, String groupName) {	
 		FaceRecognition fr = new FaceRecognition(groupName);
+		Scanner scan = new Scanner(System.in);
 		ArrayList<String> newPersonIds = new ArrayList<String>();
 		newPersonIds = dbTemplate.selectNewPersons(onwerId);
 		for (String newPersonId : newPersonIds) {
-			System.out.println(newPersonId);
-			//fr.personUpdate(newPersonId, "");
+			
+			System.out.print("Enter the name of Person " + newPersonId + " : ");
+			String newPersonName;
+			newPersonName = scan.nextLine();
+							
+			if (newPersonName.length() > 0) {
+				Person person = fr.personUpdate(newPersonId, newPersonName);
+				if (person != null)
+					dbTemplate.updatePersonName(person.getPersonName(), person.getPersonId());
+			}
 		}
+		scan.close();
 	}
 	
-	//TODO UPDATE PERSON NAME, RELATION
+	public void updateNewRalations(String ownerId) {
+		Scanner scan = new Scanner(System.in);
+		ArrayList<String> newPersonIds = new ArrayList<String>();
+		newPersonIds = dbTemplate.selectNewPersonRelations(ownerId);
+		for (String newPersonId : newPersonIds) {
+			System.out.print("Enter the relation with Person " + newPersonId + " : ");
+			String newRelation;
+			newRelation = scan.nextLine();
+			
+			if (newRelation.length() > 0) {
+				dbTemplate.updatePersonRelation(ownerId, newPersonId, newRelation);
+			}
+		}
+		scan.close();
+	}
+	
 	public ArrayList<String> getNewImage(int num) {
 		ArrayList<String> imageUrls = new ArrayList<String>();
 		imageUrls = dbTemplate.selectNewImage(num);
@@ -81,8 +106,8 @@ public class Extractor {
 		String imageOwnerId = "daehoonkim@kaist.ac.kr";
 		
 		//ex.getInformation(imageUrl, groupName, imageOwnerId);	
-		ex.updateNewPersons(imageOwnerId, groupName);
-		
+		//ex.updateNewPersons(imageOwnerId, groupName);
+		//ex.updateNewRalations(imageOwnerId);
 		System.out.println("END");
 	}
 }
