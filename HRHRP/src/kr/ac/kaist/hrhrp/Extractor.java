@@ -96,14 +96,20 @@ public class Extractor {
 	private void getExternalInfo(Image image) {
 		// TO DO : get external information
 	}
-		
+			
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
 		Extractor ex = new Extractor();
-		String imageUrl = "http://img2.sbs.co.kr/img/sbs_cms/VD/2013/11/08/VD33114235_w656.jpg";
 		String groupName = "HRHRP_Test";
 		String imageOwnerId = "daehoonkim@kaist.ac.kr";
+		
+		ArrayList<String> newImageUrls = ex.getNewImage(10);
+		
+		for (String newImageUrl : newImageUrls) {
+			System.out.println(newImageUrl);
+			ex.getInformation(newImageUrl, groupName, imageOwnerId);	
+		}
 		
 		//ex.getInformation(imageUrl, groupName, imageOwnerId);	
 		//ex.updateNewPersons(imageOwnerId, groupName);

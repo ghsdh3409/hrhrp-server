@@ -175,6 +175,10 @@ public class DBWriter {
 		}
 	}
 	
+	public void updatePersonId(String existedId, String deletedId) {
+		// TODO update Person ID (Delete personId in Person, Update PhotoPerson)
+	}
+	
 	public void insertPersonRelation(String ownerId, String personId, String relation) {
 		PreparedStatement ps;
 		try {
