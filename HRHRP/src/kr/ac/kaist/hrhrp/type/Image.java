@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Image {
 	private String url;
-	private ArrayList<ArrayList<Person>> persons = new ArrayList<ArrayList<Person>>();
+	private ArrayList<Person> persons = new ArrayList<Person>();
 	private float[] gps;
 	private long imageTime;	
 	private String address;
@@ -19,7 +19,7 @@ public class Image {
 		groupName = aGroupName;
 	}
 
-	public void setPersons(ArrayList<ArrayList<Person>> aPersons) {
+	public void setPersons(ArrayList<Person> aPersons) {
 		persons = aPersons;
 	}
 
@@ -68,7 +68,7 @@ public class Image {
 		return weather;
 	}
 	
-	public ArrayList<ArrayList<Person>> getPersons() {
+	public ArrayList<Person> getPersons() {
 		return persons;
 	}
 	
