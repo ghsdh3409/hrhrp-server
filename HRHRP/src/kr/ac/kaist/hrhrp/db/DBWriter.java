@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import kr.ac.kaist.hrhrp.type.Image;
+
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 public class DBWriter {
@@ -15,7 +17,7 @@ public class DBWriter {
 	
 	private Connection conn = null;
 	
-	private final String SELECT_IMAGE_SQL = "SELECT url FROM Photo WHERE state = 0 LIMIT ?";
+	private final String SELECT_IMAGE_SQL = "SELECT * FROM Photo WHERE state = 0 LIMIT ?";
 	private final String INSERT_IMAGE_INFO_SQL = "INSERT INTO Photo (url, path, taken_at, owner_id, lat, lng) VALUES (?, ?, ? ,?, ?, ?)";
 	private final String UPDATE_IMAGE_WEATHER_INFO_SQL = "UPDATE Photo SET weather = ? WHERE url = ?";
 	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE url = ?";
@@ -59,16 +61,32 @@ public class DBWriter {
 		conn = null;
 	}
 	
-	public ArrayList<String> selectNewImage(int num) {
-		ArrayList<String> imageUrls = new ArrayList<String>();
+	public ArrayList<Image> selectNewImages(int num, String groupName) {
+		ArrayList<Image> images = new ArrayList<Image>();
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(SELECT_IMAGE_SQL);
 			ps.setInt(1, num);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()) {
-				String imageUrl = rs.getString(1);
-				imageUrls.add(imageUrl);
+				
+				String imageUrl = rs.getString("url");
+				String path = rs.getString("path");
+				String ownerId = rs.getString("owner_id");
+				Double lat = rs.getDouble("lat");
+				Double lng = rs.getDouble("lng");
+				String weather = rs.getString("weather");
+				
+				Image image = new Image(imageUrl, ownerId, groupName);
+				image.setPath(path);
+				if (lat != null && lng != null) {
+					image.setGPS(lat, lng);
+				}
+				if (weather != null) {
+					image.setWeather(weather);
+				}
+				
+				images.add(image);
 			}
 			rs.close();
 			ps.close();
@@ -76,7 +94,7 @@ public class DBWriter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return imageUrls;
+		return images;
 	}
 	
 	public void updateImageState(String imageId, int state) {

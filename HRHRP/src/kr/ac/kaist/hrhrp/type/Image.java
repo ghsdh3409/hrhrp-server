@@ -5,13 +5,17 @@ import java.util.ArrayList;
 public class Image {
 	private String url;
 	private ArrayList<Person> persons = new ArrayList<Person>();
-	private float[] gps;
+	private double[] gps = {36.370300, 127.361573};
 	private long imageTime;	
 	private String address;
 	private String buildingName;
 	private String weather;
 	private String imageOwnerId;
 	private String groupName;
+	private String path;
+		
+	private String imageHour = "2133";
+	private String imageDate = "20141126";
 	
 	public Image(String aUrl, String aImageownerId, String aGroupName) {
 		url = aUrl;
@@ -19,11 +23,15 @@ public class Image {
 		groupName = aGroupName;
 	}
 
+	public void setPath(String aPath) {
+		path = aPath;
+	}
+	
 	public void setPersons(ArrayList<Person> aPersons) {
 		persons = aPersons;
 	}
 
-	public void setGPS(float lat, float lng) {
+	public void setGPS(double lat, double lng) {
 		gps[0] = lat;
 		gps[1] = lng;
 	}
@@ -46,6 +54,10 @@ public class Image {
 	
 	public void setGroupName(String aGroupName) {
 		groupName = aGroupName;
+	}
+	
+	public String getPath() {
+		return path;
 	}
 	
 	public String getGroupName() {
@@ -76,12 +88,20 @@ public class Image {
 		return url;
 	}
 	
-	public float[] getGPS() {
+	public double[] getGPS() {
 		return gps;
 	}
 	
 	public long getImageTime() {
 		return imageTime;
+	}
+	
+	public String getImageHour() {
+		return imageHour;
+	}
+	
+	public String getImageDate() {
+		return imageDate;
 	}
 
 }

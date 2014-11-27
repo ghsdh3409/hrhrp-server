@@ -19,6 +19,8 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="libs/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="libs/PhotoFilter.jar"/>
-	<classpathentry kind="lib" path="libs/weatherAPI.jar"/>
+	<classpathentry kind="lib" path="libs/WeatherAPI.jar"/>
+	<classpathentry kind="lib" path="libs/javax.xml-1.3.4.jar"/>
+	<classpathentry kind="lib" path="libs/cxf-core-3.0.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
