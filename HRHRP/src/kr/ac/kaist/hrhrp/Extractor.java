@@ -57,8 +57,17 @@ public class Extractor {
 							
 			if (newPersonName.length() > 0) {
 				Person person = fr.personUpdate(newPersonId, newPersonName);
-				if (person != null)
-					dbTemplate.updatePersonName(person.getPersonName(), person.getPersonId());
+				System.out.println(person.getPersonId());
+				System.out.println(newPersonId);
+				if (person != null) {
+					if (newPersonId.equals(person.getPersonId())){ // New Person
+						System.out.println("NEW");
+						dbTemplate.updatePersonName(person.getPersonName(), person.getPersonId());
+					} else { // Existed User
+						System.out.println("EXISTED");
+						dbTemplate.updatePersonId(person.getPersonId(), newPersonId);
+					}
+				}
 			}
 		}
 		scan.close();
@@ -111,8 +120,7 @@ public class Extractor {
 			ex.getInformation(newImageUrl, groupName, imageOwnerId);	
 		}
 		
-		//ex.getInformation(imageUrl, groupName, imageOwnerId);	
-		//ex.updateNewPersons(imageOwnerId, groupName);
+		ex.updateNewPersons(imageOwnerId, groupName);
 		//ex.updateNewRalations(imageOwnerId);
 		System.out.println("END");
 	}

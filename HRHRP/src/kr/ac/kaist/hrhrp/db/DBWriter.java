@@ -19,6 +19,7 @@ public class DBWriter {
 	private final String INSERT_IMAGE_INFO_SQL = "INSERT INTO Photo (path, taken_at, latitude, longitude, owner_id) VALUES (?, ?, ? ,?, ?)";
 	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE path = ?";
 	
+	private final String DELETE_PERSON_INFO_SQL = "DELETE FROM Person WHERE person_id = ?";
 	private final String INSERT_PERSON_INFO_SQL = "INSERT INTO Person (person_id, name) VALUES (?, ?)";
 	private final String INSERT_PERSON_RELATION_SQL = "INSERT INTO PersonPerson (owner_id, person_id, relationship) VALUES (?, ?, ?)";
 	private final String UPDATE_PERSON_NAME_SQL = "UPDATE Person SET name = ? WHERE person_id = ?";
@@ -26,6 +27,7 @@ public class DBWriter {
 	private final String SELECT_NEW_PERSON_RELATION_SQL = "SELECT Person.person_id FROM PersonPerson INNER JOIN Person ON PersonPerson.person_id = Person.person_id WHERE owner_id = ? and PersonPerson.relationship is NULL";
 	private final String UPDATE_PERSON_RELATION_SQL = "UPDATE PersonPerson SET relationship = ? WHERE owner_id = ? and person_id = ?";
 	
+	private final String UPDATE_PHOTO_PERSON_SQL = "UPDATE PhotoPerson SET person_id = ? WHERE person_id = ?";
 	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id) VALUES (?, ?)";
 	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE path = ?";
 	
@@ -177,6 +179,22 @@ public class DBWriter {
 	
 	public void updatePersonId(String existedId, String deletedId) {
 		// TODO update Person ID (Delete personId in Person, Update PhotoPerson)
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_PHOTO_PERSON_SQL);
+			ps.setString(1, existedId);
+			ps.setString(2, deletedId);
+			ps.executeUpdate();
+			ps.close();
+			
+			ps = conn.prepareStatement(DELETE_PERSON_INFO_SQL);
+			ps.setString(1, deletedId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void insertPersonRelation(String ownerId, String personId, String relation) {
