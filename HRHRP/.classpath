@@ -17,5 +17,8 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="libs/PhotoFilter.jar"/>
+	<classpathentry kind="lib" path="libs/weatherAPI.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
