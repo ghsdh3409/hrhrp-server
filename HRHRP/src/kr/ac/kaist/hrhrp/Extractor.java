@@ -2,6 +2,8 @@ package kr.ac.kaist.hrhrp;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import weather.WeatherAPI;
+import weather.WeatherAPI.WeatherInfo;
 import kr.ac.kaist.hrhrp.FaceRecognition;
 import kr.ac.kaist.hrhrp.db.DBWriter;
 import kr.ac.kaist.hrhrp.type.Image;
@@ -102,10 +104,21 @@ public class Extractor {
 		return persons;
 	}
 	
-	private void getExternalInfo(Image image) {
+	public void getExternalInfo(Image image) {
 		// TO DO : get external information
+		
+		WeatherAPI wAPI = new WeatherAPI();
+		double lat = 36.370300;
+		double lng = 127.361573;
+		WeatherInfo testinfo = wAPI.getWeatherInfo("20141127", "20:02", lat, lng);
 	}
-			
+	
+	private void updateWeather(WeatherInfo info, Image image) {
+		// TO DO:
+		String weather = "";
+		dbTemplate.updateWeatherInfo(weather, image.getUrl());
+	}
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
@@ -120,8 +133,10 @@ public class Extractor {
 			ex.getInformation(newImageUrl, groupName, imageOwnerId);	
 		}
 		
-		ex.updateNewPersons(imageOwnerId, groupName);
+		//ex.updateNewPersons(imageOwnerId, groupName);
 		//ex.updateNewRalations(imageOwnerId);
+		
+		ex.close();
 		System.out.println("END");
 	}
 }

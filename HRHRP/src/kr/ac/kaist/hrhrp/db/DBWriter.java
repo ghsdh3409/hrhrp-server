@@ -15,9 +15,10 @@ public class DBWriter {
 	
 	private Connection conn = null;
 	
-	private final String SELECT_IMAGE_SQL = "SELECT path FROM Photo WHERE state = 0 LIMIT ?";
-	private final String INSERT_IMAGE_INFO_SQL = "INSERT INTO Photo (path, taken_at, latitude, longitude, owner_id) VALUES (?, ?, ? ,?, ?)";
-	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE path = ?";
+	private final String SELECT_IMAGE_SQL = "SELECT url FROM Photo WHERE state = 0 LIMIT ?";
+	private final String INSERT_IMAGE_INFO_SQL = "INSERT INTO Photo (url, path, taken_at, owner_id, lat, lng) VALUES (?, ?, ? ,?, ?, ?)";
+	private final String UPDATE_IMAGE_WEATHER_INFO_SQL = "UPDATE Photo SET weather = ? WHERE url = ?";
+	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE url = ?";
 	
 	private final String DELETE_PERSON_INFO_SQL = "DELETE FROM Person WHERE person_id = ?";
 	private final String INSERT_PERSON_INFO_SQL = "INSERT INTO Person (person_id, name) VALUES (?, ?)";
@@ -29,7 +30,7 @@ public class DBWriter {
 	
 	private final String UPDATE_PHOTO_PERSON_SQL = "UPDATE PhotoPerson SET person_id = ? WHERE person_id = ?";
 	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id) VALUES (?, ?)";
-	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE path = ?";
+	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE url = ?";
 	
 	
 	public DBWriter() {
@@ -98,6 +99,20 @@ public class DBWriter {
 			ps = conn.prepareStatement(UPDATE_PERSON_NAME_SQL);
 			ps.setString(1, personName);
 			ps.setString(2, personId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateWeatherInfo(String weather, String imageId) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_IMAGE_WEATHER_INFO_SQL);
+			ps.setString(1, weather);
+			ps.setString(2, imageId);
 			ps.executeUpdate();
 			ps.close();
 		} catch (Exception e) {
@@ -178,7 +193,6 @@ public class DBWriter {
 	}
 	
 	public void updatePersonId(String existedId, String deletedId) {
-		// TODO update Person ID (Delete personId in Person, Update PhotoPerson)
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(UPDATE_PHOTO_PERSON_SQL);
@@ -230,15 +244,16 @@ public class DBWriter {
 		}
 	}
 	
-	public void insertImageInfo(String imageId, long imageTime, float lat, float lng, String ownerId) {
+	public void insertImageInfo(String imageUrl, String imagePath, long imageTime, String ownerId, double lat, double lng) {
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(INSERT_IMAGE_INFO_SQL);
-			ps.setString(1, imageId);
-			ps.setLong(2, imageTime);
-			ps.setFloat(3, lat);
-			ps.setFloat(4, lng);
-			ps.setString(5, ownerId);
+			ps.setString(1, imageUrl);
+			ps.setString(2, imagePath);
+			ps.setLong(3, imageTime);
+			ps.setString(4, ownerId);
+			ps.setDouble(5, lat);
+			ps.setDouble(6, lng);
 			ps.executeUpdate();
 			ps.close();
 		} catch(MySQLIntegrityConstraintViolationException e) {
