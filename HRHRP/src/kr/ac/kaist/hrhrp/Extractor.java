@@ -5,20 +5,22 @@ import java.util.Scanner;
 import weather.WeatherAPI;
 import weather.WeatherInfo;
 import kr.ac.kaist.hrhrp.FaceRecognition;
-import kr.ac.kaist.hrhrp.db.DBWriter;
+import kr.ac.kaist.hrhrp.db.DBHandler;
+import kr.ac.kaist.hrhrp.type.Face;
 import kr.ac.kaist.hrhrp.type.Image;
+import kr.ac.kaist.hrhrp.type.Init;
 import kr.ac.kaist.hrhrp.type.Person;
 
-public class Extractor {
+public class Extractor extends Init {
 
-	private DBWriter dbTemplate;
+	private DBHandler dbTemplate;
 	
 	private final int COMPLETE_STATE = 1;
 	//private final int NEW_STATE = 0;
 	//private final int ERROR_STATE = -1;
 	
 	public Extractor() {
-		dbTemplate = new DBWriter();
+		dbTemplate = new DBHandler();
 	}
 	
 	public void close() {
@@ -33,10 +35,13 @@ public class Extractor {
 		System.out.println("Reconized Person List");
 		
 		for(Person person : recogPersons) {
+			ArrayList<Face> faces = person.getFaces();
+			Face face = faces.get(faces.size()-1);
 			System.out.println(person.getPersonName() + "\t" + person.getPersonId());
 			dbTemplate.insertPersonInfo(person.getPersonId(), person.getPersonName());
 			dbTemplate.insertPersonRelation(image.getImageOwnerId(), person.getPersonId(), null);
-			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId());
+			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId(), face.getFaceId(), face.getPosition().getWidth(),
+					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
 		}
 	
 		WeatherInfo info = getExternalInfo(image);
@@ -45,11 +50,39 @@ public class Extractor {
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
 	}
 	
-	public void updateNewPersons(String onwerId, String groupName) {	
+	public ArrayList<Person> getNewPersons(String ownerId) {
+		ArrayList<String> newPersonIds = new ArrayList<String>();
+		newPersonIds = dbTemplate.selectNewPersons(ownerId);
+		
+		ArrayList<Person> newPersons = new ArrayList<Person>();
+		
+		for (String newPersonId : newPersonIds) {
+			Person newPerson = dbTemplate.selectFacesPerson(newPersonId);
+			newPersons.add(newPerson);
+		}
+		
+		return newPersons;
+	}
+	
+	public ArrayList<Person> getNewRelations(String ownerId) {
+		ArrayList<String> newPersonIds = new ArrayList<String>();
+		newPersonIds = dbTemplate.selectNewPersonRelations(ownerId);
+		
+		ArrayList<Person> newPersons = new ArrayList<Person>();
+		
+		for (String newPersonId : newPersonIds) {
+			Person newPerson = new Person(newPersonId, KEY_PERSON_ID);
+			newPersons.add(newPerson);
+		}
+		
+		return newPersons;
+	}
+	
+	public void updateNewPersons(String ownerId, String groupName) {	
 		FaceRecognition fr = new FaceRecognition(groupName);
 		Scanner scan = new Scanner(System.in);
 		ArrayList<String> newPersonIds = new ArrayList<String>();
-		newPersonIds = dbTemplate.selectNewPersons(onwerId);
+		newPersonIds = dbTemplate.selectNewPersons(ownerId);
 		for (String newPersonId : newPersonIds) {
 			
 			System.out.print("Enter the name of Person " + newPersonId + " : ");
@@ -119,8 +152,7 @@ public class Extractor {
 		
 		Extractor ex = new Extractor();
 		String groupName = "HRHRP_Test";
-		String imageOwnerId = "daehoonkim@kaist.ac.kr";
-		
+	
 		ArrayList<Image> newImages = ex.getNewImages(10, groupName);
 		
 		for (Image image : newImages) {

@@ -6,11 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import kr.ac.kaist.hrhrp.type.Face;
 import kr.ac.kaist.hrhrp.type.Image;
+import kr.ac.kaist.hrhrp.type.Person;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
-public class DBWriter {
+public class DBHandler {
 		
 	private final String url = "jdbc:mysql://kse-dm2.kaist.ac.kr/hrhrp?user=mschoy&password=minsoo";
 	private final String className = "com.mysql.jdbc.Driver";
@@ -31,11 +33,14 @@ public class DBWriter {
 	private final String UPDATE_PERSON_RELATION_SQL = "UPDATE PersonPerson SET relationship = ? WHERE owner_id = ? and person_id = ?";
 	
 	private final String UPDATE_PHOTO_PERSON_SQL = "UPDATE PhotoPerson SET person_id = ? WHERE person_id = ?";
-	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id) VALUES (?, ?)";
+	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id, face_id, width, height, center_x, center_y) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE url = ?";
 	
+	private final String SELECT_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE person_id = ?";
+	//TODO : Select face id from photo person
 	
-	public DBWriter() {
+	
+	public DBHandler() {
 		init();
 	}
 	
@@ -155,6 +160,41 @@ public class DBWriter {
 		}
 	}
 	
+	public Person selectFacesPerson(String aPersonId) {
+		Person person = new Person();
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(SELECT_PHOTO_PERSON_SQL);
+			ps.setString(1, aPersonId);
+			ResultSet rs = ps.executeQuery();
+				
+			while(rs.next()) {
+				String imageUrl = rs.getString("photo_id");
+				String personId = rs.getString("person_id");
+				String faceId = rs.getString("face_id");
+				double width = rs.getDouble("width");
+				double height = rs.getDouble("height");
+				double center_x = rs.getDouble("center_x");
+				double center_y = rs.getDouble("center_y");
+				
+				person.setPersonId(personId);
+				
+				Face face = new Face();
+				face.setFaceId(faceId);
+				face.setImgUrl(imageUrl);
+				face.setPosition(width, height, center_x, center_y);
+				
+				person.addFace(face);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return person;
+	}
+	
 	public ArrayList<String> selectNewPersons(String ownerId) {
 		ArrayList<String> newPersons = new ArrayList<String>();
 		PreparedStatement ps;
@@ -246,12 +286,19 @@ public class DBWriter {
 		}
 	}
 	
-	public void insertImagePerson(String imageId, String personId) {
+	public void insertImagePerson(String imageId, String personId, String faceId, double width, double height, double center_x, double center_y) {
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(INSERT_IMAGE_PERSON_SQL);
+			
 			ps.setString(1, imageId);
 			ps.setString(2, personId);
+			ps.setString(3, faceId);
+			ps.setDouble(4, width);
+			ps.setDouble(5, height);
+			ps.setDouble(6, center_x);
+			ps.setDouble(7, center_y);
+			
 			ps.executeUpdate();
 			ps.close();
 		} catch(MySQLIntegrityConstraintViolationException e) {

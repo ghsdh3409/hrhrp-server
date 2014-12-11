@@ -3,20 +3,22 @@ package kr.ac.kaist.hrhrp;
 import hrhrp.PhotoFilter;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
-import kr.ac.kaist.hrhrp.db.DBWriter;
+import kr.ac.kaist.hrhrp.db.DBHandler;
 
 public class ImageFilter {
 	
-	private DBWriter dbTemplate;
+	private DBHandler dbTemplate;
 	
 	private final static String srcPath = "D:/HRHRP_TEST/source/";
 	private final static String destPath = "D:/HRHRP_TEST/destination/";
 	private final static String domain = "http://dmserver1.kaist.ac.kr/hrhrp/images/photos/";
 
 	public ImageFilter() {
-		dbTemplate = new DBWriter();
+		dbTemplate = new DBHandler();
 	}
 	
 	public void close() {
@@ -69,9 +71,13 @@ public class ImageFilter {
 			PhotoFilter pf = new PhotoFilter();
 			
 			ArrayList<String> imagePaths = new ArrayList<String>();
+
+			Date d = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+			String nowDate =  sdf.format(d);
 			
-			String userSrcPath = srcPath + user;
-			String userDestPath = destPath + user;
+			String userSrcPath = srcPath + user + "/" + nowDate + "/";
+			String userDestPath = destPath + user + "/" + nowDate + "/";
 			
 			filter.validateFolder(userDestPath);
 
