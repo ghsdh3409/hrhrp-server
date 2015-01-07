@@ -16,7 +16,7 @@ public class Image {
 		
 	private String imageHour = "2133";
 	private String imageDate = "20141126";
-	
+		
 	public Image(String aUrl, String aImageownerId, String aGroupName) {
 		url = aUrl;
 		imageOwnerId = aImageownerId;
@@ -25,6 +25,10 @@ public class Image {
 
 	public void setPath(String aPath) {
 		path = aPath;
+	}
+	
+	public void addPerson(Person aPerson) {
+		persons.add(aPerson);
 	}
 	
 	public void setPersons(ArrayList<Person> aPersons) {

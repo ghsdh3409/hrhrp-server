@@ -8,11 +8,12 @@ import java.util.ArrayList;
 
 import kr.ac.kaist.hrhrp.type.Face;
 import kr.ac.kaist.hrhrp.type.Image;
+import kr.ac.kaist.hrhrp.type.Init;
 import kr.ac.kaist.hrhrp.type.Person;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
-public class DBHandler {
+public class DBHandler extends Init {
 		
 	private final String url = "jdbc:mysql://kse-dm2.kaist.ac.kr/hrhrp?user=mschoy&password=minsoo";
 	private final String className = "com.mysql.jdbc.Driver";
@@ -39,7 +40,36 @@ public class DBHandler {
 	private final String SELECT_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE person_id = ?";
 	//TODO : Select face id from photo person
 	
+	//TODO : Select Images By Templates
+	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE Photo.owner_id = ? and Person.name is not null";
 	
+	private final String SELECT_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE Photo.owner_id = ? and PersonPerson.relationship is not null";
+	
+	private final String SELECT_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE Photo.owner_id = ? and Person.name = '?'";
+	
+	private final String SELECT_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE Photo.owner_id = ? and Person.name = '?'";
+	
+	private final String SELECT_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM PhotoJOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url"
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE Photo.owner_id = ?";
+		
 	public DBHandler() {
 		init();
 	}
@@ -344,4 +374,56 @@ public class DBHandler {
 			e.printStackTrace();
 		}
 	}
+	
+	public ArrayList<Image> selectImagesByTemplate(int templateType, String mOwnerId) {
+		PreparedStatement ps = null;
+		ArrayList<Image> images = new ArrayList<Image>();
+		try {
+			if (templateType == 1) {
+				ps = conn.prepareStatement(SELECT_PHOTO_BY_T1);
+				ps.setString(1, mOwnerId);
+			} else if (templateType == 2) {
+				ps = conn.prepareStatement(SELECT_PHOTO_BY_T2);
+				ps.setString(1, mOwnerId);
+			}
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				String url = rs.getString("photo_id");
+				String ownerId = rs.getString("owner_id");
+				String takenAt = rs.getString("taken_at");
+				
+				Image image = new Image(url, ownerId, groupName);
+				
+				String personId = rs.getString("person_id");
+				String name = rs.getString("name");
+				String relationship = rs.getString("relationship");
+				
+				Person person = new Person();
+				person.setPersonId(personId);
+				person.setPersonName(name);
+				person.setPersonRelation(relationship);
+				
+				String faceId = rs.getString("face_id");
+				double width = rs.getDouble("width");
+				double height = rs.getDouble("height");
+				double center_x = rs.getDouble("center_x");
+				double center_y = rs.getDouble("center_y");
+				
+				Face face = new Face();
+				face.setFaceId(faceId);
+				face.setPosition(width, height, center_x, center_y);
+			
+				person.addFace(face);
+				image.addPerson(person);
+				
+				images.add(image);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return images;
+	}	
 }
