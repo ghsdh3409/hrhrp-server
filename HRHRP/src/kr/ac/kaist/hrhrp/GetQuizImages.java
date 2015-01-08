@@ -13,10 +13,12 @@ public class GetQuizImages {
 	private static String KEY_INCORRECT = "wrong";
 	
 	public static HashMap<String, ArrayList<Image>> getQuizImages(int templateType, String user) {
-		if (templateType == 1) {
+		if (templateType == 1 || templateType == 3) {
 			return getImagesTemplate1(user);
-		} else if (templateType == 2) {
+		} else if (templateType == 2 || templateType == 4) {
 			return getImagesTemplate2(user);
+		} else if (templateType == 5) {
+			return getImagesTemplate5(user);
 		} else {
 			return null;
 		}
@@ -88,6 +90,27 @@ public class GetQuizImages {
 		return quizImages;
 	}
 	
+	public static HashMap<String, ArrayList<Image>> getImagesTemplate5(String ownerId) {
+		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
+		
+		ArrayList<Image> personalizedImages = new ArrayList<Image>();
+		ArrayList<Image> correctImages = new ArrayList<Image>();
+		ArrayList<Image> incorrectImages = new ArrayList<Image>();
+		
+		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(5, ownerId);
+		personalizedImages = personalization(images);
+		
+		Image correctImage = personalizedImages.get(0);
+		correctImages.add(correctImage);
+		
+		incorrectImages = dbTemplate.selectImagesByTemplate(-5, ownerId);
+
+		quizImages.put(KEY_CORRECT, correctImages);
+		quizImages.put(KEY_INCORRECT, incorrectImages);
+		
+		return quizImages;
+	}
+	
 	private static ArrayList<Image> personalization(ArrayList<Image> images) {
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
 
@@ -97,7 +120,7 @@ public class GetQuizImages {
 	}
 		
 	public static void main(String[] args) {
-		HashMap<String, ArrayList<Image>> quizSet = getQuizImages(2, "ghsdh3409@gmail.com");
+		HashMap<String, ArrayList<Image>> quizSet = getQuizImages(5, "ghsdh3409@gmail.com");
 		for (Image image : quizSet.get(KEY_CORRECT)) {
 			System.out.println(image.getPersons().get(0).getPersonRelation());
 		}

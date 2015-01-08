@@ -27,7 +27,7 @@ public class Extractor extends Init {
 	}
 
 	public void getInformation(Image image, String groupName) {
-
+		
 		ArrayList<Person> recogPersons = faceRecogition(image);
 		image.setPersons(recogPersons);
 
@@ -42,7 +42,7 @@ public class Extractor extends Init {
 			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId(), face.getFaceId(), face.getPosition().getWidth(),
 					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
 		}
-
+		
 		WeatherInfo info = getExternalInfo(image);
 		updateWeather(info, image);
 
@@ -111,6 +111,7 @@ public class Extractor extends Init {
 
 	public WeatherInfo getExternalInfo(Image image) {
 		WeatherAPI wAPI = new WeatherAPI();
+
 		WeatherInfo info = wAPI.getWeatherInfo(image.getImageDate(), image.getImageHour(), image.getGPS()[0], image.getGPS()[1]);
 		return info;
 	}

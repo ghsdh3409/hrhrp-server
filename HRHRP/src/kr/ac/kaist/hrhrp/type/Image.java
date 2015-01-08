@@ -1,21 +1,21 @@
 package kr.ac.kaist.hrhrp.type;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Image {
 	private String url;
 	private ArrayList<Person> persons = new ArrayList<Person>();
 	private double[] gps = {36.370300, 127.361573};
-	private long imageTime;	
+	private Date imageTime;	
 	private String address;
 	private String buildingName;
 	private String weather;
 	private String imageOwnerId;
 	private String groupName;
 	private String path;
-		
-	private String imageHour = "2133";
-	private String imageDate = "20141126";
+
 		
 	public Image(String aUrl, String aImageownerId, String aGroupName) {
 		url = aUrl;
@@ -40,7 +40,7 @@ public class Image {
 		gps[1] = lng;
 	}
 	
-	public void setImageTime(long aImageTime) {
+	public void setImageTime(Date aImageTime) {
 		imageTime = aImageTime;
 	}
 	
@@ -96,15 +96,26 @@ public class Image {
 		return gps;
 	}
 	
-	public long getImageTime() {
+	public Date getImageTime() {
 		return imageTime;
 	}
 	
 	public String getImageHour() {
+		/*
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(imageTime);
+		int hours = calendar.get(Calendar.HOUR_OF_DAY);
+		int minutes = calendar.get(Calendar.MINUTE);
+		return String.valueOf(hours) + String.valueOf(minutes);
+		*/
+		
+		String imageHour = new SimpleDateFormat("HHmm").format(imageTime);
 		return imageHour;
+		
 	}
 	
 	public String getImageDate() {
+		String imageDate = new SimpleDateFormat("yyyyMMdd").format(imageTime);
 		return imageDate;
 	}
 

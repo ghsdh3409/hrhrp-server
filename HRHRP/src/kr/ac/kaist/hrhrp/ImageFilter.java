@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import kr.ac.kaist.hrhrp.db.DBHandler;
+import kr.ac.kaist.hrhrp.util.JPEGExifExtraction;
 
 public class ImageFilter {
 	
@@ -58,7 +59,7 @@ public class ImageFilter {
 		return domain + user + "/" + filename;
 	}
 	
-	public void uploadDatabase(String imageUrl, String imagePath, String ownerId, long imageTime, double lat, double lng) {
+	public void uploadDatabase(String imageUrl, String imagePath, String ownerId, Date imageTime, double lat, double lng) {
 		dbTemplate.insertImageInfo(imageUrl, imagePath, imageTime, ownerId, lat, lng);
 	}
 
@@ -86,9 +87,19 @@ public class ImageFilter {
 			for (String imagePath : imagePaths) {
 				String imgUrl = filter.getImgURL(user, imagePath);
 				System.out.println(imgUrl);
+				
 				double lat = 36.370300;
 				double lng = 127.361573;
-				filter.uploadDatabase(imgUrl, imagePath, user, 00000000, lat, lng);
+				
+				Date takenAt = null;
+				
+				try {
+					takenAt = JPEGExifExtraction.getEXIFDateInfo(imagePath);
+				} catch (Exception e) {	
+					takenAt = null;
+				}
+				
+				filter.uploadDatabase(imgUrl, imagePath, user, takenAt, lat, lng);
 			}
 			
 		}
