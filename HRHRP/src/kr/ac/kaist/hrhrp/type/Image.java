@@ -16,11 +16,16 @@ public class Image {
 	private String groupName;
 	private String path;
 
-		
 	public Image(String aUrl, String aImageownerId, String aGroupName) {
 		url = aUrl;
 		imageOwnerId = aImageownerId;
 		groupName = aGroupName;
+	}
+	
+	public static Image getDefaultImage() {
+		String defaulUrl = "http://default.image.url";
+		Image image = new Image(defaulUrl, null, null);
+		return image;
 	}
 
 	public void setPath(String aPath) {
