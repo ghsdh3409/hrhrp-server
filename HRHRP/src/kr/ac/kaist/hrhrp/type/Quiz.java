@@ -14,6 +14,8 @@ public class Quiz {
 	
 	private ArrayList<Selection> selections = new ArrayList<Selection>();
 	
+	private int answer;
+	
 	public int getQuizId() {
 		return quizId;
 	}
@@ -42,6 +44,10 @@ public class Quiz {
 		return selections;
 	}
 
+	public int getAnswer() {
+		return answer;
+	}
+	
 	public void setQuizId(int quizId) {
 		this.quizId = quizId;
 	}
@@ -68,5 +74,9 @@ public class Quiz {
 	
 	public void addSelection(Selection selection) {
 		selections.add(selection);
+	}
+	
+	public void setAnswer(int answer) {
+		this.answer = answer;
 	}
 }

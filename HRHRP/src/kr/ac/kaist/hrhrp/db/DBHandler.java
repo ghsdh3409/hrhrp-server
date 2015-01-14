@@ -45,6 +45,8 @@ public class DBHandler extends Init {
 	
 	private final String SELECT_QUIZ_SQL = "SELECT Quiz.* FROM Quiz Where solver_id = ? AND solved = 0";
 	private final String SELECT_FACE_SQL = "SELECT PhotoPerson.* FROM PhotoPerson Where face_id = ?";
+	private final String UPDATE_QUIZ_SOLVED_SQL = "UPDATE Quiz SET solved = ? WHERE quiz_id = ?";
+	
 	
 	//TODO : Select Images By Templates
 	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
@@ -543,6 +545,8 @@ public class DBHandler extends Init {
 				sel4.setSelection(selection4);
 				sel4.setSelectionFace(selection4Face);
 				
+				int answer = rs.getInt("answer");
+				
 				Quiz quiz = new Quiz();
 				quiz.setQuizId(quizId);
 				quiz.setTemplateId(templateId);
@@ -554,7 +558,7 @@ public class DBHandler extends Init {
 				quiz.addSelection(sel2);
 				quiz.addSelection(sel3);
 				quiz.addSelection(sel4);
-				
+				quiz.setAnswer(answer);
 				quizes.add(quiz);
 			}
 			rs.close();
@@ -565,5 +569,19 @@ public class DBHandler extends Init {
 		}
 		return quizes;
 	}	
+	
+	public void updateQuizSolved(int quizId, int solved) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_QUIZ_SOLVED_SQL);
+			ps.setInt(1, solved);
+			ps.setInt(2, quizId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 }
