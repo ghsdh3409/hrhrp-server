@@ -14,7 +14,7 @@ public class JDBC {
 	ResultSet rs;
 	
 	String getTemplateSQL="SELECT template FROM Template WHERE template_id=?";
-	String addQuizToDBSQL="INSERT INTO Quiz (template_id, solver_id, quiz_text, quiz_image, selection_type, selection1, selection2, selection3, selection4, answer, solved) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+	String addQuizToDBSQL="INSERT INTO Quiz (template_id, solver_id, quiz_text, quiz_image, selection_type, selection1, selection2, selection3, selection4, answer, solved, quiz_face, selection1_face, selection2_face, selection3_face, selection4_face) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 	String getRelationSQL="SELECT relationship FROM PersonPerson WHERE owner_id=? AND person_id=?";
 	
 	public JDBC(){
@@ -49,7 +49,7 @@ public class JDBC {
 		return relationship;
 	}
 	
-	void insertQuiz(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number) throws SQLException{
+	void insertQuiz(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number, String quiz_face, String[] selections_faces) throws SQLException{
 		pstmt=conn.prepareStatement(addQuizToDBSQL);
 		pstmt.setInt(1, template_id);
 		pstmt.setString(2, solver_id);
@@ -62,6 +62,11 @@ public class JDBC {
 		pstmt.setString(9, selections[3]);
 		pstmt.setInt(10, answer_number);
 		pstmt.setInt(11, 0);
+		pstmt.setString(12, quiz_face);
+		pstmt.setString(13, selections_faces[0]);
+		pstmt.setString(14, selections_faces[1]);
+		pstmt.setString(15, selections_faces[2]);
+		pstmt.setString(16, selections_faces[3]);
 		pstmt.executeUpdate();
 	}
 	

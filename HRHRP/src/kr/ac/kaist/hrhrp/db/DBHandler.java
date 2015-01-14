@@ -11,6 +11,8 @@ import kr.ac.kaist.hrhrp.type.Face;
 import kr.ac.kaist.hrhrp.type.Image;
 import kr.ac.kaist.hrhrp.type.Init;
 import kr.ac.kaist.hrhrp.type.Person;
+import kr.ac.kaist.hrhrp.type.Quiz;
+import kr.ac.kaist.hrhrp.type.Selection;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
@@ -40,6 +42,9 @@ public class DBHandler extends Init {
 	
 	private final String SELECT_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE person_id = ?";
 	//TODO : Select face id from photo person
+	
+	private final String SELECT_QUIZ_SQL = "SELECT Quiz.* FROM Quiz Where solver_id = ? AND solved = 0";
+	private final String SELECT_FACE_SQL = "SELECT PhotoPerson.* FROM PhotoPerson Where face_id = ?";
 	
 	//TODO : Select Images By Templates
 	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
@@ -452,4 +457,113 @@ public class DBHandler extends Init {
 		}
 		return images;
 	}	
+	
+	public Face selectFace(String aFaceId) {
+		PreparedStatement ps;
+		Face face = null;
+		try {
+			ps = conn.prepareStatement(SELECT_FACE_SQL);
+			ps.setString(1, aFaceId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				String faceId = rs.getString("face_id");
+				String photoId = rs.getString("photo_id");
+				
+				double width = rs.getDouble("width");
+				double height = rs.getDouble("height");
+				double centerX = rs.getDouble("center_x");
+				double centerY = rs.getDouble("center_y");
+				
+				face = new Face();		
+				face.setFaceId(faceId);
+				face.setImgUrl(photoId);
+				face.setPosition(width, height, centerX, centerY);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return face;
+	}	
+	
+	public ArrayList<Quiz> selectQuiz(String ownerId) {
+		PreparedStatement ps;
+		ArrayList<Quiz> quizes = new ArrayList<Quiz>();
+		try {
+			ps = conn.prepareStatement(SELECT_QUIZ_SQL);
+			ps.setString(1, ownerId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				int quizId = rs.getInt("quiz_id");
+				int templateId = rs.getInt("template_id");
+				String solverId = rs.getString("solver_id");
+				
+				String quizText = rs.getString("quiz_text");
+				String quizImage = rs.getString("quiz_image");
+				String quizImageFace = rs.getString("quiz_face");
+				Face quizFace = selectFace(quizImageFace);
+				
+				String selectionType = rs.getString("selection_type");		
+				
+				String selection1 = rs.getString("selection1");
+				String selectionFace1 = rs.getString("selection1_face");
+				Face selection1Face = selectFace(selectionFace1); 
+				
+				Selection sel1 = new Selection();
+				sel1.setSelectionType(selectionType);
+				sel1.setSelection(selection1);
+				sel1.setSelectionFace(selection1Face);
+				
+				String selection2 = rs.getString("selection2");
+				String selectionFace2 = rs.getString("selection2_face");
+				Face selection2Face = selectFace(selectionFace2); 
+				
+				Selection sel2 = new Selection();
+				sel2.setSelectionType(selectionType);
+				sel2.setSelection(selection2);
+				sel2.setSelectionFace(selection2Face);
+				
+				String selection3 = rs.getString("selection3");
+				String selectionFace3 = rs.getString("selection3_face");
+				Face selection3Face = selectFace(selectionFace3); 
+				
+				Selection sel3 = new Selection();
+				sel3.setSelectionType(selectionType);
+				sel3.setSelection(selection3);
+				sel3.setSelectionFace(selection3Face);
+				
+				String selection4 = rs.getString("selection4");
+				String selectionFace4 = rs.getString("selection4_face");
+				Face selection4Face = selectFace(selectionFace4); 
+					
+				Selection sel4 = new Selection();
+				sel4.setSelectionType(selectionType);
+				sel4.setSelection(selection4);
+				sel4.setSelectionFace(selection4Face);
+				
+				Quiz quiz = new Quiz();
+				quiz.setQuizId(quizId);
+				quiz.setTemplateId(templateId);
+				quiz.setSolverId(solverId);
+				quiz.setQuizText(quizText);
+				quiz.setQuizImageUrl(quizImage);
+				quiz.setQuizFace(quizFace);
+				quiz.addSelection(sel1);
+				quiz.addSelection(sel2);
+				quiz.addSelection(sel3);
+				quiz.addSelection(sel4);
+				
+				quizes.add(quiz);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return quizes;
+	}	
+	
 }

@@ -48,9 +48,9 @@ public class QuizGen {
 	}
 	
 	// 퀴즈DB에 퀴즈 추가
-	void quizToDB(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number){
+	void quizToDB(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number, String quiz_face, String[] selections_face){
 		try {
-			jdbc.insertQuiz(template_id, solver_id, quiz_text, quiz_image, selection_type, selections, answer_number);
+			jdbc.insertQuiz(template_id, solver_id, quiz_text, quiz_image, selection_type, selections, answer_number, quiz_face, selections_face);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Quiz Insertion Error");
@@ -105,8 +105,10 @@ public class QuizGen {
 		String quiz_text="";
 		Image quiz_image=null;
 		String quiz_image_url=null;
+		String quiz_face_id = null;
 		String selection_type="";
 		String[] selections=new String[4];
+		String[] selections_faces = new String[4];
 		int answer_number=0;
 		//String quiz_date="";
 		//PhotoSelector ps=new PhotoSelector();
@@ -137,6 +139,9 @@ public class QuizGen {
 			quiz_text=quiz_template;
 			quiz_image=selectedImages.get("right").get(0);  	// 정답이름에 해당하는 사진
 			quiz_image_url=quiz_image.getUrl();						// 정답 사진의 URL
+			if (quiz_image.getPersons().size() > 0) {
+				quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+			}
 			answer_number=this.genRandNumber(1, 4);			// 정답 번호 만들기
 			selection_type="text";											// 텍스트 보기
 			String person_name;
@@ -165,6 +170,9 @@ public class QuizGen {
 			quiz_text=quiz_template;
 			quiz_image=selectedImages.get("right").get(0);
 			quiz_image_url=quiz_image.getUrl();
+			if (quiz_image.getPersons().size() > 0) {
+				quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+			}
 			answer_number=this.genRandNumber(1, 4);
 			selection_type="text";
 			String person_id, relation;
@@ -213,9 +221,15 @@ public class QuizGen {
 			for(int i=0;i<4;i++){
 				if(i==answer_number-1){
 					selections[i]=selectedImages.get("right").get(0).getUrl();						// 정답
+					if (selectedImages.get("right").get(0).getPersons().size() > 0) {
+						selections_faces[i] = selectedImages.get("right").get(0).getPersons().get(0).getFaces().get(0).getFaceId();
+					}
 				}
 				else{
 					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					if (selectedImages.get("wrong").get(0).getPersons().size() > 0) {
+						selections_faces[i] = selectedImages.get("wrong").get(0).getPersons().get(0).getFaces().get(0).getFaceId();
+					}
 				}
 			}
 		}
@@ -239,9 +253,15 @@ public class QuizGen {
 			for(int i=0;i<4;i++){
 				if(i==answer_number-1){
 					selections[i]=selectedImages.get("right").get(0).getUrl();						// 정답
+					if (selectedImages.get("right").get(0).getPersons().size() > 0) {
+						selections_faces[i] = selectedImages.get("right").get(0).getPersons().get(0).getFaces().get(0).getFaceId();
+					}
 				}
 				else{
 					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					if (selectedImages.get("wrong").get(0).getPersons().size() > 0) {
+						selections_faces[i] = selectedImages.get("wrong").get(0).getPersons().get(0).getFaces().get(0).getFaceId();
+					}
 				}
 			}
 		}
@@ -251,11 +271,19 @@ public class QuizGen {
 			if(selectedImages.get("right").size()>0){  // 만남
 				quiz_image=selectedImages.get("right").get(0);     // 정답이름에 해당하는 사진
 				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
+				if (quiz_image.getPersons().size() > 0) {
+					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+				}
+				
 				answer_number=1;
 			}
 			else{	// 안만남
 				quiz_image=selectedImages.get("wrong").get(0);  // 정답이름에 해당하는 사진
 				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
+				if (quiz_image.getPersons().size() > 0) {
+					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+				}
+				
 				answer_number=2;
 			}
 			selection_type="text";
@@ -319,7 +347,7 @@ public class QuizGen {
 				}
 			}
 		}
-		this.quizToDB(template_id, solver_id, quiz_text, quiz_image_url,selection_type, selections, answer_number);
+		this.quizToDB(template_id, solver_id, quiz_text, quiz_image_url,selection_type, selections, answer_number, quiz_face_id, selections_faces);
 		return true;
 	}
 }
