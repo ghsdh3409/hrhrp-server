@@ -14,8 +14,8 @@ public class ImageFilter {
 	
 	private DBHandler dbTemplate;
 	
-	private final static String srcPath = "D:/HRHRP_TEST/source/";
-	private final static String destPath = "D:/HRHRP_TEST/destination/";
+	private static String srcPath = "";
+	private final static String destPath = "/var/www/hrhrp/images/photos/";
 	private final static String domain = "http://dmserver1.kaist.ac.kr/hrhrp/images/photos/";
 
 	public ImageFilter() {
@@ -55,8 +55,9 @@ public class ImageFilter {
 	public String getImgURL(String user, String filePath) {
 		File file = new File(filePath);
 		String filename = file.getName();
+		String parentDir = file.getParentFile().getName();
 		
-		return domain + user + "/" + filename;
+		return domain + user + "/" + parentDir + "/" + filename;
 	}
 	
 	public void uploadDatabase(String imageUrl, String imagePath, String ownerId, Date imageTime, double lat, double lng) {
@@ -65,6 +66,8 @@ public class ImageFilter {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		
+		srcPath = args[0];
 		
 		ImageFilter filter = new ImageFilter();
 		

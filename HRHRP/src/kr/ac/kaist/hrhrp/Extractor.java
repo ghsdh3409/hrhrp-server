@@ -27,7 +27,7 @@ public class Extractor extends Init {
 	}
 
 	public void getInformation(Image image, String groupName) {
-		
+
 		ArrayList<Person> recogPersons = faceRecogition(image);
 		image.setPersons(recogPersons);
 
@@ -42,7 +42,7 @@ public class Extractor extends Init {
 			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId(), face.getFaceId(), face.getPosition().getWidth(),
 					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
 		}
-		
+
 		WeatherInfo info = getExternalInfo(image);
 		updateWeather(info, image);
 
@@ -129,11 +129,13 @@ public class Extractor extends Init {
 
 		ArrayList<Image> newImages = ex.getNewImages(10, groupName);
 
-		for (Image image : newImages) {
-			System.out.println(image.getUrl());
-			ex.getInformation(image, groupName);	
+		while (newImages.size() > 0) {
+			for (Image image : newImages) {
+				System.out.println(image.getUrl());
+				ex.getInformation(image, groupName);	
+			}
+			newImages = ex.getNewImages(10, groupName);
 		}
-
 		//ex.updateNewPersons(imageOwnerId, groupName);
 		//ex.updateNewRalations(imageOwnerId);
 

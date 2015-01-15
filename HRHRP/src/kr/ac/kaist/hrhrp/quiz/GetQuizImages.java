@@ -1,6 +1,7 @@
 package kr.ac.kaist.hrhrp.quiz;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import kr.ac.kaist.hrhrp.db.DBHandler;
@@ -199,6 +200,8 @@ public class GetQuizImages {
 
 		personalizedImages = images;
 
+		Collections.shuffle(personalizedImages);
+		
 		return personalizedImages;
 	}
 
