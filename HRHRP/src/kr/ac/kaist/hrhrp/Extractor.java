@@ -155,7 +155,6 @@ public class Extractor extends Init {
 				String district = address[2];
 				String street = address[3];
 
-				System.out.println(city + "\t" + district + "\t" + street);
 				dbTemplate.updateAddressInfo(city, district, street, image.getUrl());
 			}
 
@@ -173,8 +172,6 @@ public class Extractor extends Init {
 			//add request header
 
 			int responseCode = con.getResponseCode();
-			System.out.println("\nSending 'GET' request to URL : " + url);
-			System.out.println("Response Code : " + responseCode);
 
 			BufferedReader in = new BufferedReader(
 					new InputStreamReader(con.getInputStream()));
