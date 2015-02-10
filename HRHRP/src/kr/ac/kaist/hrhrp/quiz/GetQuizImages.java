@@ -207,7 +207,7 @@ public class GetQuizImages {
 
 	public static void main(String[] args) {
 		QuizGen guizGen = new QuizGen();
-		guizGen.generateQuizset(5, "ghsdh3409@gmail.com");
+		guizGen.generateQuizset(30, "ghsdh3409@gmail.com");
 
 		/*
 		HashMap<String, ArrayList<Image>> quizSet = getQuizImages(5, "ghsdh3409@gmail.com");

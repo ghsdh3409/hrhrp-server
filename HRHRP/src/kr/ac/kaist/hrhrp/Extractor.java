@@ -1,5 +1,12 @@
 package kr.ac.kaist.hrhrp;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import weather.WeatherAPI;
 import weather.WeatherInfo;
@@ -43,10 +50,13 @@ public class Extractor extends Init {
 					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
 		}
 
+		updateAddress(image);
+		
 		WeatherInfo info = getExternalInfo(image);
 		updateWeather(info, image);
-
+		
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
+		
 	}
 
 	public ArrayList<Person> getNewPersons(String ownerId) {
@@ -119,6 +129,69 @@ public class Extractor extends Init {
 	private void updateWeather(WeatherInfo info, Image image) {
 		String weather = info.HUMIDITY + "/" + info.SKY + "/" + info.RAINFALL + "/" + info.TEMPERATURE;
 		dbTemplate.updateWeatherInfo(weather, image.getUrl());
+	}
+
+	private void updateAddress(Image image) {
+
+		double[] gps = image.getGPS();
+
+		double lat = gps[0];
+		double lng = gps[1];
+
+		String url = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&sensor=false&language=ko";
+		String queryResult;
+
+		queryResult = sendGet(url);
+
+		if (queryResult != null) { 
+			JSONObject jsonResult = new JSONObject(queryResult);
+
+			if (jsonResult.getString("status").equals("OK")) {
+				JSONArray results = jsonResult.getJSONArray("results");
+				JSONObject result = results.getJSONObject(0);
+				String formattedAddress = result.getString("formatted_address");
+				String[] address = formattedAddress.split(" ");
+				String city = address[1];
+				String district = address[2];
+				String street = address[3];
+
+				System.out.println(city + "\t" + district + "\t" + street);
+				dbTemplate.updateAddressInfo(city, district, street, image.getUrl());
+			}
+
+		}
+	}
+
+	private static String sendGet(String url) {
+		try {
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+			// optional default is GET
+			con.setRequestMethod("GET");
+
+			//add request header
+
+			int responseCode = con.getResponseCode();
+			System.out.println("\nSending 'GET' request to URL : " + url);
+			System.out.println("Response Code : " + responseCode);
+
+			BufferedReader in = new BufferedReader(
+					new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			return response.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 
 	public static void main(String[] args) {

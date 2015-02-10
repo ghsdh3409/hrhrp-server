@@ -26,6 +26,7 @@ public class DBHandler extends Init {
 	private final String SELECT_IMAGE_SQL = "SELECT * FROM Photo WHERE state = 0 LIMIT ?";
 	private final String INSERT_IMAGE_INFO_SQL = "INSERT INTO Photo (url, path, taken_at, owner_id, lat, lng) VALUES (?, ?, ? ,?, ?, ?)";
 	private final String UPDATE_IMAGE_WEATHER_INFO_SQL = "UPDATE Photo SET weather = ? WHERE url = ?";
+	private final String UPDATE_IMAGE_ADDRESS_INFO_SQL = "UPDATE Photo SET city = ?, district = ?, street = ? WHERE url = ?";
 	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE url = ?";
 	
 	private final String DELETE_PERSON_INFO_SQL = "DELETE FROM Person WHERE person_id = ?";
@@ -186,6 +187,22 @@ public class DBHandler extends Init {
 			ps = conn.prepareStatement(UPDATE_IMAGE_WEATHER_INFO_SQL);
 			ps.setString(1, weather);
 			ps.setString(2, imageId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateAddressInfo(String city, String district, String street, String imageId) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_IMAGE_ADDRESS_INFO_SQL);
+			ps.setString(1, city);
+			ps.setString(2, district);
+			ps.setString(3, street);
+			ps.setString(4, imageId);
 			ps.executeUpdate();
 			ps.close();
 		} catch (Exception e) {
