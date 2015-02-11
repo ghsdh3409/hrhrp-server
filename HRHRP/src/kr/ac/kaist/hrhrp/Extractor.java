@@ -192,10 +192,6 @@ public class Extractor extends Init {
 			// optional default is GET
 			con.setRequestMethod("GET");
 
-			//add request header
-
-			int responseCode = con.getResponseCode();
-
 			BufferedReader in = new BufferedReader(
 					new InputStreamReader(con.getInputStream()));
 			String inputLine;
