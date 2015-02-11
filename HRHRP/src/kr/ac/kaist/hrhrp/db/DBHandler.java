@@ -27,6 +27,7 @@ public class DBHandler extends Init {
 	private final String INSERT_IMAGE_INFO_SQL = "INSERT INTO Photo (url, path, taken_at, owner_id, lat, lng) VALUES (?, ?, ? ,?, ?, ?)";
 	private final String UPDATE_IMAGE_WEATHER_INFO_SQL = "UPDATE Photo SET weather = ? WHERE url = ?";
 	private final String UPDATE_IMAGE_ADDRESS_INFO_SQL = "UPDATE Photo SET city = ?, district = ?, street = ? WHERE url = ?";
+	private final String UPDATE_IMAGE_COLOR_INFO_SQL = "UPDATE Photo SET color_H = ?, color_S = ?, color_V = ? WHERE url = ?";
 	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE url = ?";
 	
 	private final String DELETE_PERSON_INFO_SQL = "DELETE FROM Person WHERE person_id = ?";
@@ -210,6 +211,23 @@ public class DBHandler extends Init {
 			e.printStackTrace();
 		}
 	}
+	
+	public void updateColorInfo(String[] colorInfo, String imageId) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_IMAGE_COLOR_INFO_SQL);
+			ps.setString(1, colorInfo[0]);
+			ps.setString(2, colorInfo[1]);
+			ps.setString(3, colorInfo[2]);
+			ps.setString(4, imageId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public void insertPersonInfo(String personId, String personName) {
 		PreparedStatement ps;

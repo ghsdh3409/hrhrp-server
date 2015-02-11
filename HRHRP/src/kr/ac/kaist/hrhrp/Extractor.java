@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import FeatureExtraction.StartFeature;
 import weather.WeatherAPI;
 import weather.WeatherInfo;
 import kr.ac.kaist.hrhrp.FaceRecognition;
@@ -34,7 +35,7 @@ public class Extractor extends Init {
 	}
 
 	public void getInformation(Image image, String groupName) {
-
+		
 		ArrayList<Person> recogPersons = faceRecogition(image);
 		image.setPersons(recogPersons);
 
@@ -49,14 +50,17 @@ public class Extractor extends Init {
 			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId(), face.getFaceId(), face.getPosition().getWidth(),
 					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
 		}
-
-		updateAddress(image);
 		
+		updateAddress(image);
+
 		WeatherInfo info = getExternalInfo(image);
 		updateWeather(info, image);
+
+		String[] colorInfo = getColorInfo(image);
+		updateColor(colorInfo, image);
 		
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
-		
+
 	}
 
 	public ArrayList<Person> getNewPersons(String ownerId) {
@@ -129,6 +133,25 @@ public class Extractor extends Init {
 	private void updateWeather(WeatherInfo info, Image image) {
 		String weather = info.HUMIDITY + "/" + info.SKY + "/" + info.RAINFALL + "/" + info.TEMPERATURE;
 		dbTemplate.updateWeatherInfo(weather, image.getUrl());
+	}
+
+	private String[] getColorInfo(Image image) {
+		try {
+			String filePath = image.getPath();
+			StartFeature sf = new StartFeature();
+
+			String[] hsv = sf.startFromFile(filePath);			
+			return hsv;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}	
+		return null;
+	}
+	
+	private void updateColor(String[] colorInfo, Image image) {
+		if (colorInfo != null) {
+			dbTemplate.updateColorInfo(colorInfo, image.getUrl());
+		}		
 	}
 
 	private void updateAddress(Image image) {
