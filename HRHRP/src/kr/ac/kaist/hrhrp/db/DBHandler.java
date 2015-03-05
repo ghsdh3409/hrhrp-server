@@ -51,37 +51,37 @@ public class DBHandler extends Init {
 	
 	
 	//TODO : Select Images By Templates
-	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and Person.name is not null";
 	
-	private final String SELECT_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and PersonPerson.relationship is not null";
 	
-	private final String SELECT_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and Person.name is not null";
 	
-	private final String SELECT_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and PersonPerson.relationship is not null";
 	
-	private final String SELECT_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) = CURDATE()";
 		
-	private final String SELECT_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
@@ -457,10 +457,16 @@ public class DBHandler extends Init {
 			while(rs.next()) {
 				String url = rs.getString("photo_id");
 				String ownerId = rs.getString("owner_id");
+				String city = rs.getString("city");
+				String district = rs.getString("district");
+				String street = rs.getString("street");
 				Date takenAt = rs.getTimestamp("taken_at");
+				String weather = rs.getString("weather");
 				
 				Image image = new Image(url, ownerId, groupName);
+				image.setAddress(city, district, street);
 				image.setImageTime(takenAt);
+				image.setWeather(weather);
 				
 				String personId = rs.getString("person_id");
 				String name = rs.getString("name");

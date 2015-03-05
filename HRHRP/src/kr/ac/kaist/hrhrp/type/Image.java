@@ -9,7 +9,9 @@ public class Image {
 	private ArrayList<Person> persons = new ArrayList<Person>();
 	private double[] gps = {36.370300, 127.361573};
 	private Date imageTime;	
-	private String address;
+	private String city;
+	private String district;
+	private String street;
 	private String buildingName;
 	private String weather;
 	private String imageOwnerId;
@@ -49,8 +51,10 @@ public class Image {
 		imageTime = aImageTime;
 	}
 	
-	public void setAddress(String mAddress) {
-		address = mAddress;
+	public void setAddress(String city, String district, String street) {
+		this.city = city;
+		this.district = district;
+		this.street = street;
 	}
 	
 	public void setBuildingName(String aBuildingName) {
@@ -77,8 +81,16 @@ public class Image {
 		return imageOwnerId;
 	}
 	
-	public String getAddress() {
-		return address;
+	public String getCity() {
+		return city;
+	}
+	
+	public String getDistrict() {
+		return district;
+	}
+	
+	public String getStreet() {
+		return street;
 	}
 	
 	public String getBuildingName() {
