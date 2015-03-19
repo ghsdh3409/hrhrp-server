@@ -2,13 +2,9 @@ package kr.ac.kaist.hrhrp.quiz;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -269,7 +265,7 @@ public class GetQuizImages {
 	
 	public static void main(String[] args) {
 		QuizGen guizGen = new QuizGen();
-		guizGen.generateQuizset(2, "ghsdh3409@gmail.com");
+		guizGen.generateQuizset(10, "ghsdh3409@gmail.com");
 
 		/*
 		HashMap<String, ArrayList<Image>> quizSet = getQuizImages(5, "ghsdh3409@gmail.com");
