@@ -28,6 +28,7 @@ public class DBHandler extends Init {
 	private final String UPDATE_IMAGE_WEATHER_INFO_SQL = "UPDATE Photo SET weather = ? WHERE url = ?";
 	private final String UPDATE_IMAGE_ADDRESS_INFO_SQL = "UPDATE Photo SET city = ?, district = ?, street = ? WHERE url = ?";
 	private final String UPDATE_IMAGE_COLOR_INFO_SQL = "UPDATE Photo SET color_H = ?, color_S = ?, color_V = ? WHERE url = ?";
+	private final String UPDATE_IMAGE_OBJECT_INFO_SQL = "UPDATE Photo SET object_id = ? WHERE url = ?";
 	private final String UPDATE_IMAGE_STATE_SQL = "UPDATE Photo SET state = ? WHERE url = ?";
 	
 	private final String DELETE_PERSON_INFO_SQL = "DELETE FROM Person WHERE person_id = ?";
@@ -617,6 +618,21 @@ public class DBHandler extends Init {
 			ps = conn.prepareStatement(UPDATE_QUIZ_SOLVED_SQL);
 			ps.setInt(1, solved);
 			ps.setInt(2, quizId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void updateObjectInfo(int objectIdx, String imageId) {
+		// TODO Auto-generated method stub
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_IMAGE_OBJECT_INFO_SQL);
+			ps.setInt(1, objectIdx);
+			ps.setString(2, imageId);
 			ps.executeUpdate();
 			ps.close();
 		} catch (Exception e) {

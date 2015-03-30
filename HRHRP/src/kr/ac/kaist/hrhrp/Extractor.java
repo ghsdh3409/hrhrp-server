@@ -17,6 +17,7 @@ import kr.ac.kaist.hrhrp.type.Face;
 import kr.ac.kaist.hrhrp.type.Image;
 import kr.ac.kaist.hrhrp.type.Init;
 import kr.ac.kaist.hrhrp.type.Person;
+import kr.ac.kaist.hrhrp.util.ObjectRecognizer;
 
 public class Extractor extends Init {
 
@@ -59,8 +60,16 @@ public class Extractor extends Init {
 		int[] colorInfo = getColorInfo(image);
 		updateColor(colorInfo, image);
 		
+		int objectIdx = ObjectRecognizer.objectReconizer(image);
+		updateObject(objectIdx, image);
+		
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
 
+	}
+
+	private void updateObject(int objectIdx, Image image) {
+		// TODO Auto-generated method stub
+		dbTemplate.updateObjectInfo(objectIdx, image.getUrl());
 	}
 
 	public ArrayList<Person> getNewPersons(String ownerId) {
