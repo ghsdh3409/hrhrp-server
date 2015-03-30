@@ -2,13 +2,14 @@ package FeatureExtraction;
 
 import org.opencv.core.*;
 import org.opencv.highgui.*;
-
 import org.opencv.core.*;
 import org.opencv.imgproc.*;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 
@@ -179,7 +180,29 @@ public class HSV_Extractor {
 	}
 	
 	
-
+	private int getMostFrequentNumber(ArrayList<Integer> list) {
+		HashMap<Integer, Integer> freq = new HashMap<Integer, Integer> ();
+		for (int i=0; i<list.size(); i++) {
+			int number = list.get(i);
+			if (!freq.containsKey(number))
+				freq.put(number, 0);
+			freq.put(number, freq.get(number)+1);
+		}
+		
+		int max = -1;
+		int maxIdx = -1;
+		for (int key : freq.keySet()) {
+			int freqNum = freq.get(key);
+			
+			if (max < freqNum) {
+				maxIdx = key;
+				max = freqNum;
+			}
+		}
+		
+		return maxIdx;
+	}
+	
 	private void approximateSV(Mat v_hist, int hmax2, BufferedWriter out, StringBuffer stb, char sv) throws IOException {
 		int i, x, tmp, color_max = -1, idx = 0, w_bin = Math.round( 256 / vHistSize);
 		int[] sv_table = new int[numberOfSV];
@@ -188,58 +211,23 @@ public class HSV_Extractor {
 			sv_table[i] = 0;
 		}
 	
+		ArrayList<Integer> valueList = new ArrayList<Integer>();
+		
 		for(i = 0; i < hmax2; i++){
 			x = i * w_bin;
 			double[] t = v_hist.get(i,0);
 			tmp = Integer.valueOf((int) Math.round(t[0]));
 			
-			
-			
-			if(tmp < slotSize){
-				sv_table[0] = sv_table[0] + tmp;
-			}
-			else if(tmp >= slotSize && tmp < slotSize*2){
-				sv_table[1] = sv_table[1] + tmp;
-			}
-			else if(tmp >= slotSize*2 && tmp < slotSize*3){
-				sv_table[2] = sv_table[2] + tmp;
-			}
-			else if(tmp >= slotSize*3 && tmp < slotSize*4){
-				sv_table[3] = sv_table[3] + tmp;
-			}
-			else if(tmp >= slotSize*4 && tmp < slotSize*5){
-				sv_table[4] = sv_table[4] + tmp;
-			}
-			else if(tmp >= slotSize*5 && tmp < slotSize*6){
-				sv_table[5] = sv_table[5] + tmp;
-			}
-			else if(tmp >= slotSize*6 && tmp < slotSize*7){
-				sv_table[6] = sv_table[6] + tmp;
-			}
-			else if(tmp >= slotSize*7 && tmp <= slotSize*8){
-				sv_table[7] = sv_table[7] + tmp;
-			}
+			valueList.add(tmp);
+		}
 
-		}
+		int mostFrequentValue = getMostFrequentNumber(valueList);
 		
-		for(i = 0; i < numberOfSV; i++){
-			sv_table[i] = sv_table[i] / slotSize;
-		}
-		
-		
-		stb.append(sv + ";");
-		
-		for(i = 0; i < numberOfSV; i++){
-			if(i == numberOfSV-1)
-				stb.append(sv_table[i]);
-			else
-				stb.append(sv_table[i]+",");
-			out.write((i+1) + "\t" + sv_table[i] + "\n");
-		}  
+		stb.append(sv + ";" + mostFrequentValue);
+
 	}
 	
-
-	static void approximateH(Mat hist, int histSize, BufferedWriter out, StringBuffer stb ) throws IOException{
+	private void approximateH(Mat hist, int histSize, BufferedWriter out, StringBuffer stb ) throws IOException{
 		int i, x, tmp, color_max = -1, idx = 0, w_bin = Math.round( hMax / histSize);
 		int[] color_table = new int[numberOfColor];
 		
@@ -247,66 +235,19 @@ public class HSV_Extractor {
 		for(i = 0; i < numberOfColor; i++){
 			color_table[i] = 0;
 		}
-	
+		
+		ArrayList<Integer> valueList = new ArrayList<Integer>();
+		
 		for(i = 0; i < histSize; i++){
 			x = i * w_bin;
 			double[] t = hist.get(i,0);
 			
 			tmp = Integer.valueOf((int) Math.round(t[0]));
-			//out.write((i+1) + "\t" + tmp + "\n");
-			//System.out.println("color = "+x+"power = "+tmp);
 			
-			// RED
-			if( (x >= 0.0 && x < 7.5) || (x >= 172.5 && x < 180) )
-				color_table[0] = color_table[0] + tmp;
-			// ORANGE
-			else if( x >= 7.5 && x < 22.5 )
-				color_table[1] = color_table[1] + tmp;
-			// YELLOW
-			else if( x >= 22.5 && x < 37.5 )
-				color_table[2] = color_table[2] + tmp;
-			// YELLOW GREEN
-			else if( x >= 37.5 && x < 52.5 )
-				color_table[3] = color_table[3] + tmp;
-			// GREEN
-			else if( x >= 52.5 && x < 67.5 )
-				color_table[4] = color_table[4] + tmp;
-			// BLUISH GREEN
-			else if( x >= 67.5 && x < 82.5 )
-				color_table[5] = color_table[5] + tmp;
-			// CYAN
-			else if( x >= 82.5 && x < 97.5 )
-				color_table[6] = color_table[6] + tmp;
-			// NAVY BLUE
-			else if( x >= 97.5 && x < 112.5 )
-				color_table[7] = color_table[7] + tmp;
-			// BLUE
-			else if( x >= 112.5 && x < 127.5 )
-				color_table[8] = color_table[8] + tmp;
-			// PURPLE
-			else if( x >= 127.5 && x < 142.5 )
-				color_table[9] = color_table[9] + tmp;
-			// MAGENTA
-			else if( x >= 142.5 && x < 157.5 )
-				color_table[10] = color_table[10] + tmp;
-			// PINK
-			else if( x >= 157.5 && x < 172.5 )
-				color_table[11] = color_table[11] + tmp;
-		}
-
-		for( i=0; i<numberOfColor; i++){
-			color_table[i] = color_table[i] / numberOfColor;
-		}  
+			valueList.add(tmp);		
+		}  	
+		int mostFrequentValue = getMostFrequentNumber(valueList);
 		
-		stb.append("h;");
-		
-		// get the maximum among color_table value, which is the most used color in the image
-		for( i=0; i<numberOfColor; i++){
-			if(i == numberOfColor-1)
-				stb.append(color_table[i]);
-			else
-				stb.append(color_table[i]+",");
-			out.write((i+1) + "\t" + color_table[i] + "\n");
-		}  
+		stb.append("h" + ";" + mostFrequentValue);
 	}
 }
