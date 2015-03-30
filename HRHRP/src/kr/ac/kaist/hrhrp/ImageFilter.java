@@ -3,6 +3,11 @@ package kr.ac.kaist.hrhrp;
 import hrhrp.PhotoFilter;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,8 +20,8 @@ public class ImageFilter {
 	private DBHandler dbTemplate;
 	
 	private static String srcPath = "";
-	private final static String destPath = "/var/www/hrhrp/images/photos/";
-	private final static String domain = "http://dmserver1.kaist.ac.kr/hrhrp/images/photos/";
+	private final static String destPath = "/home/daehoon/public_html/hrhrp/photos/";
+	private final static String domain = "http://dmserver4.kaist.ac.kr/~daehoon/hrhrp/photos/";
 
 	public ImageFilter() {
 		dbTemplate = new DBHandler();
@@ -67,7 +72,7 @@ public class ImageFilter {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		srcPath = args[0];
+		srcPath = "/home/daehoon/HRHRP/images/source/";
 		
 		ImageFilter filter = new ImageFilter();
 		
@@ -98,7 +103,13 @@ public class ImageFilter {
 				
 				try {
 					takenAt = JPEGExifExtraction.getEXIFDateInfo(imagePath);
+					if (takenAt == null) {
+						File file = new File(imagePath);
+						long lastModifiedInMSec = file.lastModified();
+						takenAt = new Date(lastModifiedInMSec);					
+					}
 				} catch (Exception e) {	
+					e.printStackTrace();
 					takenAt = null;
 				}
 				
