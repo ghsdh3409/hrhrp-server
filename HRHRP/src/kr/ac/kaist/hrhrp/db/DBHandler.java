@@ -212,13 +212,13 @@ public class DBHandler extends Init {
 		}
 	}
 	
-	public void updateColorInfo(String[] colorInfo, String imageId) {
+	public void updateColorInfo(int[] colorInfo, String imageId) {
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(UPDATE_IMAGE_COLOR_INFO_SQL);
-			ps.setString(1, colorInfo[0]);
-			ps.setString(2, colorInfo[1]);
-			ps.setString(3, colorInfo[2]);
+			ps.setInt(1, colorInfo[0]);
+			ps.setInt(2, colorInfo[1]);
+			ps.setInt(3, colorInfo[2]);
 			ps.setString(4, imageId);
 			ps.executeUpdate();
 			ps.close();

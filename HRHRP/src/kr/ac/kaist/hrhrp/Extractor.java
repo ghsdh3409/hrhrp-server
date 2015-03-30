@@ -56,7 +56,7 @@ public class Extractor extends Init {
 		WeatherInfo info = getExternalInfo(image);
 		updateWeather(info, image);
 
-		String[] colorInfo = getColorInfo(image);
+		int[] colorInfo = getColorInfo(image);
 		updateColor(colorInfo, image);
 		
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
@@ -135,12 +135,18 @@ public class Extractor extends Init {
 		dbTemplate.updateWeatherInfo(weather, image.getUrl());
 	}
 
-	private String[] getColorInfo(Image image) {
+	private int[] getColorInfo(Image image) {
 		try {
 			String filePath = image.getPath();
 			StartFeature sf = new StartFeature();
 
-			String[] hsv = sf.startFromFile(filePath);			
+			String[] tmpHSV = sf.startFromFile(filePath);
+			
+			int hsv[] = new int[3];
+			hsv[0] = Integer.valueOf(tmpHSV[0].split("h;")[1]);
+			hsv[1] = Integer.valueOf(tmpHSV[1].split("s;")[1]);
+			hsv[2] = Integer.valueOf(tmpHSV[2].split("v;")[1]);
+			
 			return hsv;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -148,7 +154,7 @@ public class Extractor extends Init {
 		return null;
 	}
 	
-	private void updateColor(String[] colorInfo, Image image) {
+	private void updateColor(int[] colorInfo, Image image) {
 		if (colorInfo != null) {
 			dbTemplate.updateColorInfo(colorInfo, image.getUrl());
 		}		
