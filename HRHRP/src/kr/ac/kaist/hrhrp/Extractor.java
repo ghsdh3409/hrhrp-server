@@ -60,8 +60,8 @@ public class Extractor extends Init {
 		int[] colorInfo = getColorInfo(image);
 		updateColor(colorInfo, image);
 		
-		//int objectIdx = ObjectRecognizer.objectReconizer(image);
-		//updateObject(objectIdx, image);
+		int objectIdx = ObjectRecognizer.objectReconizer(image);
+		updateObject(objectIdx, image);
 		
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
 
@@ -225,7 +225,7 @@ public class Extractor extends Init {
 
 	}
 
-	public static void main(String[] args) {
+	public void extractor() {
 		// TODO Auto-generated method stub
 
 		Extractor ex = new Extractor();

@@ -8,10 +8,6 @@ import kr.ac.kaist.hrhrp.type.Image;
 
 public class ObjectRecognizer {
 
-	public static void main(String[] args){
-		getObjectIndex("/home/daehoon/image/024804.jpg");
-	}
-
 	public static int objectReconizer(Image image) {
 		String filePath = image.getPath();
 		return getObjectIndex(filePath);

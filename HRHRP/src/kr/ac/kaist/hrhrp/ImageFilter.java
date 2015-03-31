@@ -68,8 +68,8 @@ public class ImageFilter {
 	public void uploadDatabase(String imageUrl, String imagePath, String ownerId, Date imageTime, double lat, double lng) {
 		dbTemplate.insertImageInfo(imageUrl, imagePath, imageTime, ownerId, lat, lng);
 	}
-
-	public static void main(String[] args) {
+	
+	public static void imageFilter() {
 		// TODO Auto-generated method stub
 		
 		srcPath = "/home/daehoon/HRHRP/images/source/";
