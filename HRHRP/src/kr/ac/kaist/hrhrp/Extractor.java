@@ -1,5 +1,6 @@
 package kr.ac.kaist.hrhrp;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,12 +32,12 @@ public class Extractor extends Init {
 		dbTemplate = new DBHandler();
 	}
 
-	public void close() {
+	private void close() {
 		dbTemplate.close();
 	}
 
-	public void getInformation(Image image, String groupName) {
-		
+	private void getInformation(Image image, String groupName) {
+
 		ArrayList<Person> recogPersons = faceRecogition(image);
 		image.setPersons(recogPersons);
 
@@ -51,17 +52,25 @@ public class Extractor extends Init {
 			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId(), face.getFaceId(), face.getPosition().getWidth(),
 					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
 		}
-		
+
 		updateAddress(image);
 
 		WeatherInfo info = getExternalInfo(image);
 		updateWeather(info, image);
 
-		int[] colorInfo = getColorInfo(image);
-		updateColor(colorInfo, image);
-		
-		int objectIdx = ObjectRecognizer.objectReconizer(image);
-		updateObject(objectIdx, image);
+		try {
+			int objectIdx = ObjectRecognizer.objectReconizer(image);
+			updateObject(objectIdx, image);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			//int[] colorInfo = getColorInfo(image);
+			//updateColor(colorInfo, image);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
 
@@ -86,7 +95,7 @@ public class Extractor extends Init {
 		return newPersons;
 	}
 
-	public ArrayList<Person> getNewRelations(String ownerId) {
+	private ArrayList<Person> getNewRelations(String ownerId) {
 		ArrayList<String> newPersonIds = new ArrayList<String>();
 		newPersonIds = dbTemplate.selectNewPersonRelations(ownerId);
 
@@ -119,7 +128,7 @@ public class Extractor extends Init {
 		dbTemplate.updatePersonRelation(ownerId, personId, newRelation);
 	}
 
-	public ArrayList<Image> getNewImages(int num, String groupName) {
+	private ArrayList<Image> getNewImages(int num, String groupName) {
 		ArrayList<Image> images = new ArrayList<Image>();
 		images = dbTemplate.selectNewImages(num, groupName);
 		return images;
@@ -132,7 +141,7 @@ public class Extractor extends Init {
 		return persons;
 	}
 
-	public WeatherInfo getExternalInfo(Image image) {
+	private WeatherInfo getExternalInfo(Image image) {
 		WeatherAPI wAPI = new WeatherAPI();
 
 		WeatherInfo info = wAPI.getWeatherInfo(image.getImageDate(), image.getImageHour(), image.getGPS()[0], image.getGPS()[1]);
@@ -144,25 +153,21 @@ public class Extractor extends Init {
 		dbTemplate.updateWeatherInfo(weather, image.getUrl());
 	}
 
-	private int[] getColorInfo(Image image) {
-		try {
+	private int[] getColorInfo(Image image) throws Exception {
 			String filePath = image.getPath();
 			StartFeature sf = new StartFeature();
 
 			String[] tmpHSV = sf.startFromFile(filePath);
-			
+
 			int hsv[] = new int[3];
 			hsv[0] = Integer.valueOf(tmpHSV[0].split("h;")[1]);
 			hsv[1] = Integer.valueOf(tmpHSV[1].split("s;")[1]);
 			hsv[2] = Integer.valueOf(tmpHSV[2].split("v;")[1]);
-			
+
 			return hsv;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}	
-		return null;
+		
 	}
-	
+
 	private void updateColor(int[] colorInfo, Image image) {
 		if (colorInfo != null) {
 			dbTemplate.updateColorInfo(colorInfo, image.getUrl());

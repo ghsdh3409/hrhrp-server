@@ -3,6 +3,7 @@
 	<name>HRHRP</name>
 	<comment></comment>
 	<projects>
+		<project>opencvtest</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -3,7 +3,7 @@ package FeatureExtraction;
 import java.io.IOException;
 
 public class main {
-	public static void main( String[] args ) throws IOException{
+	public static void main( String[] args ) throws Exception{
 		
 		String filename = "/home/daehoon/image/024804.jpg";
 		StartFeature sf = new StartFeature();

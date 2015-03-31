@@ -40,7 +40,7 @@ public class HSV_Extractor {
 	
 	//Initialization
 	public HSV_Extractor(String _filename){
-		System.loadLibrary("opencv_java249");
+		System.load("/usr/local/share/OpenCV/java/libopencv_java249.so"); //opencv_java249
 		m=Highgui.imread(_filename,Highgui.CV_LOAD_IMAGE_COLOR);
 		filename = _filename;
 	}

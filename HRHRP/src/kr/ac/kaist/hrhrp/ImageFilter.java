@@ -1,7 +1,5 @@
 package kr.ac.kaist.hrhrp;
 
-import hrhrp.PhotoFilter;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +12,7 @@ import java.util.Date;
 
 import kr.ac.kaist.hrhrp.db.DBHandler;
 import kr.ac.kaist.hrhrp.util.JPEGExifExtraction;
+import kr.ac.kaist.hrhrp.util.PhotoFilter;
 
 public class ImageFilter {
 	
@@ -27,11 +26,11 @@ public class ImageFilter {
 		dbTemplate = new DBHandler();
 	}
 	
-	public void close() {
+	private void close() {
 		dbTemplate.close();
 	}
 	
-	public ArrayList<String> getUserPaths() {
+	private ArrayList<String> getUserPaths() {
 		ArrayList<String> userPaths = new ArrayList<String>();		
 
 		File path = new File(srcPath);
@@ -49,7 +48,7 @@ public class ImageFilter {
 
 	}
 
-	public void validateFolder(String filePath) {
+	private void validateFolder(String filePath) {
 		File file = new File( filePath );
 
 		if( file.exists() == false ) {
@@ -57,7 +56,7 @@ public class ImageFilter {
 		}
 	}
 	
-	public String getImgURL(String user, String filePath) {
+	private String getImgURL(String user, String filePath) {
 		File file = new File(filePath);
 		String filename = file.getName();
 		String parentDir = file.getParentFile().getName();
@@ -65,11 +64,11 @@ public class ImageFilter {
 		return domain + user + "/" + parentDir + "/" + filename;
 	}
 	
-	public void uploadDatabase(String imageUrl, String imagePath, String ownerId, Date imageTime, double lat, double lng) {
+	private void uploadDatabase(String imageUrl, String imagePath, String ownerId, Date imageTime, double lat, double lng) {
 		dbTemplate.insertImageInfo(imageUrl, imagePath, imageTime, ownerId, lat, lng);
 	}
 	
-	public static void imageFilter() {
+	public void imageFilter() {
 		// TODO Auto-generated method stub
 		
 		srcPath = "/home/daehoon/HRHRP/images/source/";
