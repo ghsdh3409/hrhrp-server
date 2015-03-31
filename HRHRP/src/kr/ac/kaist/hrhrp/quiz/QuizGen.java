@@ -81,7 +81,7 @@ public class QuizGen {
 	}
 	
 	// 퀴즈 세트 생성 함수
-	void generateQuizset(int numOfQuiz, String solver_id){
+	public int generateQuizset(int numOfQuiz, String solver_id){
 		int template_id;
 		int curNum=0;
 		// numOfQuiz 개수만큼 퀴즈를 생성하고, DB에 저장한다.
@@ -95,6 +95,7 @@ public class QuizGen {
 				curNum++;
 			}
 		}
+		return curNum;
 	}
 	
 	
