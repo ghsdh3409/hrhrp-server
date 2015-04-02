@@ -204,8 +204,9 @@ public class GetQuizImages {
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
 		HashMap<Image, Float> scoredImages = new HashMap<Image, Float>(); 
 		
-		QuizAnalyzer qa = new QuizAnalyzer();
-		MultilevelAssociationMiner ruleMiner=new MultilevelAssociationMiner();
+		String arffPath = "/home/daehoon/HRHRP/personalized/arff/";
+		QuizAnalyzer qa = new QuizAnalyzer(arffPath);
+		MultilevelAssociationMiner ruleMiner=new MultilevelAssociationMiner(arffPath);
 		PersonalizationScoreCalculator psc=new PersonalizationScoreCalculator();
 					
 		try {

@@ -1,16 +1,12 @@
 package kr.ac.kaist.hrhrp.quiz;
 
-// File ���
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-// Util ����
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
-// Weka ���
 import weka.associations.Apriori;
 import weka.core.Instances;
 
@@ -27,16 +23,18 @@ public class MultilevelAssociationMiner {
 	private final double upperBoundMinSupportValue = 1.0;
 	private final double minMetricValue = 0.5;
 	private final int numRulesValue = 10;
-	
-	// ����
-	public MultilevelAssociationMiner(){
+
+	private String mARFFPath;
+
+	public MultilevelAssociationMiner(String arffPath){
 		jdbc=new JDBC();
 		jdbc.setConnection();
 		freqItemsets=new HashMap<Integer,ArrayList<HashMap<String,String>>>();
 		user_id="";
+		mARFFPath = arffPath;
 	}
 	
-	// �� ������ ���Ͽ�, freq. itemset�� ã�´�.
+
 	public HashMap<Integer, ArrayList<HashMap<String,String>>> startMining(String user_id) throws Exception{
 		setUserID(user_id);
 		for(int level=treedepth;level>0;level--){
@@ -46,12 +44,12 @@ public class MultilevelAssociationMiner {
 		return freqItemsets;
 	}
 	
-	// Ư�� ������ ����, ���̴� ����.
+
 	public void getMiningResult(int level){
 		Instances data=null;
-		String arffFilename="d:\\input_lev"+level+"_"+user_id+".arff";
+		String arffFilename= mARFFPath + "input_lev"+level+"_"+user_id+".arff";
 		
-		// Input ���� �б�
+
 		try{
 			BufferedReader reader=new BufferedReader(new FileReader(arffFilename));
 			data=new Instances(reader);
@@ -63,7 +61,7 @@ public class MultilevelAssociationMiner {
 			e.printStackTrace();
 		}
 		
-		// Apriori �غ�!
+
 		String aprioriResult;
 		
 		Apriori apriori = new Apriori();
@@ -74,7 +72,7 @@ public class MultilevelAssociationMiner {
 		apriori.setMinMetric(minMetricValue); 
 		apriori.setOutputItemSets(true);
 		
-		// Apriori �˰?�� ����!
+
 		try{
 			apriori.buildAssociations(data);
 		}
@@ -84,7 +82,7 @@ public class MultilevelAssociationMiner {
 		}
 		aprioriResult=apriori.toString();
 		 
-		// �츮�� ���ϴ� �������� Freq. Itemset ���ϱ�!
+
 		ArrayList<String> itemsets=getItemsets(aprioriResult,numOfFeatures);
 		
 		for(String itemset : itemsets){
@@ -94,11 +92,10 @@ public class MultilevelAssociationMiner {
 		freqItemsets.put(level, analyzeItemsets(itemsets));
 	}
 	
-	// �ش� size�� ������ �����ۼ� ã��!
+
 	public ArrayList<String> getItemsets(String result, int size){
 		ArrayList<String> itemsets=new ArrayList<String>();
-		
-		// ���� index ã��!
+
 		System.out.println("** RETRIEVE itemsets of size "+size+"!");
 		String[] tokens=result.split("\n");
 		int startIdx=0, endIdx=0;
@@ -107,8 +104,7 @@ public class MultilevelAssociationMiner {
 				break;
 			}
 		}
-		
-		// �� index ã��!
+
 		endIdx=startIdx;
 		for(;endIdx<tokens.length;endIdx++){
 			if(tokens[endIdx].equals("")){
@@ -116,10 +112,9 @@ public class MultilevelAssociationMiner {
 			}
 		}
 		
-		startIdx++; // Large Itemsets L(1) ���������!
-		endIdx--;   // ������ �������!
+		startIdx++; 
+		endIdx--;   
 		
-		// ������ size¥�� �����ۼµ� �ֱ�!
 		for(int i=startIdx;i<=endIdx;i++){
 			itemsets.add(tokens[i]);
 		}

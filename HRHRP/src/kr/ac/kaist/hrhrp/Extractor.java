@@ -55,9 +55,13 @@ public class Extractor extends Init {
 
 		updateAddress(image);
 
-		WeatherInfo info = getExternalInfo(image);
-		updateWeather(info, image);
-
+		try {
+			WeatherInfo info = getExternalInfo(image);
+			updateWeather(info, image);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		try {
 			int objectIdx = ObjectRecognizer.objectReconizer(image);
 			updateObject(objectIdx, image);
@@ -66,6 +70,7 @@ public class Extractor extends Init {
 		}
 
 		try {
+			//TODO EXTRACT COLOR
 			//int[] colorInfo = getColorInfo(image);
 			//updateColor(colorInfo, image);
 		} catch (Exception e) {

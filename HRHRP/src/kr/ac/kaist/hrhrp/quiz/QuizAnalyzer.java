@@ -10,9 +10,13 @@ public class QuizAnalyzer {
 	private JDBC jdbc;
 	private String user_id;
 	
-	public QuizAnalyzer(){
+	private String mARFFPath;
+	
+	public QuizAnalyzer(String arffPath){
 		jdbc=new JDBC();
 		jdbc.setConnection();
+		
+		mARFFPath = arffPath;
 	}
 	
 	// Quiz분석 및 QuizFeature 테이블 채우기
@@ -126,7 +130,7 @@ public class QuizAnalyzer {
 		
 	// level에 해당하는 arff 파일 만들기!
 	public void createArffFile(int level) throws Exception{
-		File file=new File("d:\\input_lev"+level+"_"+user_id+".arff");
+		File file=new File(mARFFPath + "/input_lev"+level+"_"+user_id+".arff");
 		if(!file.exists()){
 			file.createNewFile();
 		}

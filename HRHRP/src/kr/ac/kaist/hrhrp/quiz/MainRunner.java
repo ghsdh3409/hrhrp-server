@@ -11,8 +11,9 @@ public class MainRunner {
 		
 		//PhotoFilter pf = new PhotoFilter();
 		//QuizGen qg = new QuizGen();
-		QuizAnalyzer qa = new QuizAnalyzer();
-		MultilevelAssociationMiner ruleMiner=new MultilevelAssociationMiner();
+		String arffPath = "/home/daehoon/HRHRP/personalized/arff/";
+		QuizAnalyzer qa = new QuizAnalyzer(arffPath);
+		MultilevelAssociationMiner ruleMiner=new MultilevelAssociationMiner(arffPath);
 		PersonalizationScoreCalculator psc=new PersonalizationScoreCalculator();
 		/*
 		//찍힌 사진들은 img폴더에 저장된다 가정
@@ -30,7 +31,8 @@ public class MainRunner {
 		HashMap<String,String> photo=new HashMap<String,String>();
 		//photo.put("person", "5140373f90001a7ffefbd946a1fad5ad");
 		//photo.put("person", "0aee3c7eb3f3504bcb9efdfc84cd1f91");
-		photo.put("person", "17ee226580e350dd946b1840de3882aa");
+		//photo.put("person", "17ee226580e350dd946b1840de3882aa");
+		photo.put("person", "b7e73c29d9c61ccb341456906cee8c2b");
 		photo.put("weather","구름많음+없음");
 		photo.put("time","2015-01-15 13:45:45");
 		photo.put("location","구성동");
