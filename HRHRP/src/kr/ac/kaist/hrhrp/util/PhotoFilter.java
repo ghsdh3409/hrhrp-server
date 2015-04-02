@@ -8,10 +8,9 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
 
 public class PhotoFilter {
-	ArrayList<File> selectedPhotoList;
 	
 	public PhotoFilter(){
-		selectedPhotoList=new ArrayList<File>();
+		
 	}
 	
 	/*
@@ -51,10 +50,18 @@ public class PhotoFilter {
 	
 	// folderName 폴더에 있는 사진들 중에서 골라내기!
 	public ArrayList<String> selectPhotos(String srcFolderName, String destFolderName){
+		ArrayList<File> selectedPhotoList = new ArrayList<File>();
+		ArrayList<File> processedFileList = new ArrayList<File>();
+		ArrayList<String> selectedPhotoPathList = new ArrayList<String>(); //return value
+		
 		File folder=new File(srcFolderName);
 		File[] files=folder.listFiles();
+		if (files == null) {
+			System.out.println("IMAGE_EXTRACTOR :: There is no images taken at today.");
+			return selectedPhotoPathList;
+		}
 		int numOfFiles=files.length;
-		System.out.println(numOfFiles+" images!");
+		System.out.println("IMAGE_EXTRACTOR :: Extract " + numOfFiles+" images.");
 		File file1=null, file2=null;
 		double sim;
 		boolean survived;
@@ -80,27 +87,46 @@ public class PhotoFilter {
 				}
 			}
 			if(survived) selectedPhotoList.add(file1);
+			processedFileList.add(file1);
 		}
-		this.copySelectedPhotos(destFolderName);
-		
-		ArrayList<String> AbsolutePathList=new ArrayList<String>();
+		selectedPhotoPathList = copySelectedPhotos(selectedPhotoList, destFolderName);
+		deletePhotos(processedFileList);
+		 
+		/*
 		File destFolder=new File(destFolderName);
 		for(File f: destFolder.listFiles()){
 			AbsolutePathList.add(f.getAbsolutePath());
 		}
-		return AbsolutePathList;
+		*/
+		
+		return selectedPhotoPathList;
 	}
 	
-	public void copySelectedPhotos(String destFolderName){
-		for (File f : this.selectedPhotoList){
-			File dest = new File(destFolderName+"/"+f.getName());
+	public void deletePhotos(ArrayList<File> deleteFileList){
+		for (File f : deleteFileList){
+			try {
+				f.delete();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public ArrayList<String> copySelectedPhotos(ArrayList<File> selectedPhotoList, String destFolderName){
+		ArrayList<String> copiedFilePath = new ArrayList<String>();
+		for (File f : selectedPhotoList){
+			String copyFilePath = destFolderName+"/"+f.getName();
+			File dest = new File(copyFilePath);
 			try {
 				FileUtils.copyFile(f,dest);
+				copiedFilePath.add(copyFilePath);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		return copiedFilePath;
 	}
 	
 	public double[] getHistogram(File imageFile){
