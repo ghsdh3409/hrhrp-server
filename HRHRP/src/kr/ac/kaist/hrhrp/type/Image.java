@@ -3,6 +3,7 @@ package kr.ac.kaist.hrhrp.type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
 public class Image {
 	private String url;
@@ -25,7 +26,9 @@ public class Image {
 	}
 	
 	public static Image getDefaultImage() {
-		String defaulUrl = "http://default.image.url";
+		Random r = new Random();
+		int randomPicNum = r.nextInt(7 - 1) + 1;
+		String defaulUrl = "http://dmserver4.kaist.ac.kr/~daehoon/hrhrp/photos/default/" + randomPicNum + ".jpg";
 		Image image = new Image(defaulUrl, null, null);
 		return image;
 	}
