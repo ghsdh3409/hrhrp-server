@@ -84,7 +84,7 @@ public class ImageFilter {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 			String nowDate =  sdf.format(d);
 			
-			String userSrcPath = srcPath + user + "/" + nowDate + "/";
+			String userSrcPath = srcPath + user + "/";
 			String userDestPath = destPath + user + "/" + nowDate + "/";
 			
 			filter.validateFolder(userDestPath);
@@ -100,6 +100,11 @@ public class ImageFilter {
 				
 				Date takenAt = null;
 				
+				File file = new File(imagePath);
+				long lastModifiedInMSec = file.lastModified();
+				takenAt = new Date(lastModifiedInMSec);		
+				
+				/* Unsupported
 				try {
 					takenAt = JPEGExifExtraction.getEXIFDateInfo(imagePath);
 					if (takenAt == null) {
@@ -111,6 +116,7 @@ public class ImageFilter {
 					e.printStackTrace();
 					takenAt = null;
 				}
+				*/
 				
 				filter.uploadDatabase(imgUrl, imagePath, user, takenAt, lat, lng);
 			}
