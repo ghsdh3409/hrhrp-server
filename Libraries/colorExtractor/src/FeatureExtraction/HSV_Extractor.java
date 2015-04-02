@@ -6,6 +6,7 @@ import org.opencv.core.*;
 import org.opencv.imgproc.*;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +16,9 @@ import java.util.LinkedList;
 
 public class HSV_Extractor {
 
+	static {
+		System.load("/usr/local/share/OpenCV/java/libopencv_java249.so"); //opencv_java249
+	}
 
 	//Constants
 	public static final String[] colorMatch = { "blue", "navy blue" ,"cyan" ,
@@ -33,24 +37,30 @@ public class HSV_Extractor {
 			vHist_w = 300, vHist_h = 400;
 	
 	private Mat m;
-	private String filename;
+	private String mFilename;
 
-	
-	
-	
 	//Initialization
 	public HSV_Extractor(String _filename){
-		System.load("/usr/local/share/OpenCV/java/libopencv_java249.so"); //opencv_java249
 		m=Highgui.imread(_filename,Highgui.CV_LOAD_IMAGE_COLOR);
-		filename = _filename;
+		mFilename = _filename;
 	}
 	
+	private void fileDelete(String filePath) {
+		try {
+			File file = new File(filePath);
+			file.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	//get svalue
 	public String sStart() throws IOException{
 		
+		String filename = mFilename+"_s.dat";
+		
 		//For Test
-		BufferedWriter out = new BufferedWriter(new FileWriter(filename+"_s.dat"));
+		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
 		StringBuffer sResult = new StringBuffer("");
 		
 		Mat hsv_image = new Mat();
@@ -88,14 +98,17 @@ public class HSV_Extractor {
 		}
 
 		out.close();
+		fileDelete(filename);
 		return sResult.toString();
 	}
 	
 	//getv_value
 	public String vStart() throws IOException{
 		
+		String filename = mFilename+"_v.dat";
+		
 		StringBuffer vResult = new StringBuffer("");
-		BufferedWriter out = new BufferedWriter(new FileWriter(filename+"_v.dat"));
+		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
 
 		Mat hsv_image = new Mat();
 			
@@ -126,14 +139,18 @@ public class HSV_Extractor {
 			System.out.println("There are some problems in image channel");
 		}
 		out.close();
+		
+		fileDelete(filename);
 		return vResult.toString();
 	}
 
 	//get hvalue
 	public String hStart() throws IOException{
 		
+		String filename = mFilename+"_h.dat";
+		
 		StringBuffer hResult = new StringBuffer("");
-		BufferedWriter out = new BufferedWriter(new FileWriter(filename+"_h.dat"));
+		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
 		
 		Mat hsv_image = new Mat();
 			
@@ -176,6 +193,8 @@ public class HSV_Extractor {
 		}
 
 		out.close();
+		
+		fileDelete(filename);
 		return hResult.toString();
 	}
 	

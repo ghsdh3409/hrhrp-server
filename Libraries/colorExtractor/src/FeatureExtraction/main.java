@@ -5,7 +5,7 @@ import java.io.IOException;
 public class main {
 	public static void main( String[] args ) throws Exception{
 		
-		String filename = "/home/daehoon/image/024804.jpg";
+		String filename = "/home/daehoon/image/025947.jpg";
 		StartFeature sf = new StartFeature();
 		
 		String[] hsv = sf.startFromFile(filename);
