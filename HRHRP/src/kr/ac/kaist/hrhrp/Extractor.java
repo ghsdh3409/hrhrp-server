@@ -70,9 +70,8 @@ public class Extractor extends Init {
 		}
 
 		try {
-			//TODO EXTRACT COLOR
-			//int[] colorInfo = getColorInfo(image);
-			//updateColor(colorInfo, image);
+			int[] colorInfo = getColorInfo(image);
+			updateColor(colorInfo, image);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

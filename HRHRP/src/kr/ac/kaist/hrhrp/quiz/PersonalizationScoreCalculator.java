@@ -50,6 +50,7 @@ public class PersonalizationScoreCalculator {
 		for(int level=3;level>0;level--){
 			System.out.println("- in level "+level);
 			photoFeature=getPhotoFeatureForLevel(level);
+
 			matchIdx=membershipTest(photoFeature,freqItemsets.get(level));
 			if(matchIdx!=-1){
 				matchItemset=freqItemsets.get(level).get(matchIdx);
