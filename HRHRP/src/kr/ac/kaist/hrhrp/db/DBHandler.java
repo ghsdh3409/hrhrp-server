@@ -46,6 +46,7 @@ public class DBHandler extends Init {
 	private final String SELECT_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE person_id = ?";
 	//TODO : Select face id from photo person
 	
+	private final String SELECT_SOLVED_QUIZ_CNT_SQL = "SELECT count(*) FROM Quiz Where solver_id = ? AND solved != 0";
 	private final String SELECT_QUIZ_SQL = "SELECT Quiz.* FROM Quiz Where solver_id = ? AND solved = 0";
 	private final String SELECT_FACE_SQL = "SELECT PhotoPerson.* FROM PhotoPerson Where face_id = ?";
 	private final String UPDATE_QUIZ_SOLVED_SQL = "UPDATE Quiz SET solved = ? WHERE quiz_id = ?";
@@ -112,6 +113,25 @@ public class DBHandler extends Init {
 			}
 		}
 		conn = null;
+	}
+	
+	public int getSolvedQuizCntByUsername(String ownerId) {
+		int solvedQuizCnt = 0;
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(SELECT_SOLVED_QUIZ_CNT_SQL);
+			ps.setString(1, ownerId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				solvedQuizCnt = rs.getInt(1);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return solvedQuizCnt;
 	}
 	
 	public ArrayList<Image> selectNewImages(int num, String groupName) {

@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import kr.ac.kaist.hrhrp.type.Image;
 
@@ -11,6 +13,8 @@ public class QuizGen {
 	private JDBC jdbc;
 	private ArrayList<String> default_name=new ArrayList<String>();
 	private ArrayList<String> default_relation=new ArrayList<String>();
+	
+	private final int SUPPORTED_TEMPLATE_NUM = 5; 
 	
 	// 생성자
 	public QuizGen(){
@@ -31,7 +35,7 @@ public class QuizGen {
 	// 어떤 템플릿의 퀴즈를 출제할 지 결정
 	int selectTemplateID(){
 		// 랜덤 숫자 생성하도록!
-		return genRandNumber(1,5);
+		return genRandNumber(1,SUPPORTED_TEMPLATE_NUM);
 	}
 	
 	// 퀴즈 출제 날짜 (오늘) 생성
@@ -82,19 +86,25 @@ public class QuizGen {
 	
 	// 퀴즈 세트 생성 함수
 	public int generateQuizset(int numOfQuiz, String solver_id){
+		Set failedTemplateSet = new HashSet();
 		int template_id;
 		int curNum=0;
 		// numOfQuiz 개수만큼 퀴즈를 생성하고, DB에 저장한다.
 		
-		while(curNum<numOfQuiz){
+		while(curNum<numOfQuiz && failedTemplateSet.size() < SUPPORTED_TEMPLATE_NUM){
 			// 퀴즈 템플릿을 선택한다.
 			template_id=selectTemplateID();
 			
 			// 퀴즈를 출제하고 DB에 저장한다. 출제 성공하면 퀴즈 수 하나 증가!
 			if (generateQuiz(template_id,solver_id)){
 				curNum++;
+			} else {
+				failedTemplateSet.add(template_id);
 			}
 		}
+		
+		System.out.print("FAILED TEMPLATE :: " + failedTemplateSet.toString());
+		
 		return curNum;
 	}
 	

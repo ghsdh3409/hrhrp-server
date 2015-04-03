@@ -15,6 +15,7 @@ public class JDBC {
 	private PreparedStatement pstmt;
 	private ResultSet rs;
 	
+	private final String getPhotoCntByUsernameSQL = "SELECT count(*) FROM Photo WHERE owner_id=?"; //ADDED BY DAEHOONKIM for verifying if existing photo
 	private final String getTemplateSQL="SELECT template FROM Template WHERE template_id=?";
 	private final String addQuizToDBSQL="INSERT INTO Quiz (template_id, solver_id, quiz_text, quiz_image, selection_type, selection1, selection2, selection3, selection4, answer, solved, quiz_face, selection1_face, selection2_face, selection3_face, selection4_face) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 	private final String addQuizFeatureToDBSQL="INSERT INTO QuizFeature (quiz_id, solver_id, level, person, weather, time, location, correct) VALUES (?,?,?,?,?,?,?,?)";
@@ -41,6 +42,19 @@ public class JDBC {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public int getPhotoCntByUsername(String solver_id) throws SQLException {
+		int cnt = 0;
+		
+		pstmt=conn.prepareStatement(getPhotoCntByUsernameSQL);
+		pstmt.setString(1, solver_id);
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			cnt=rs.getInt(1);
+		}
+		return cnt;
+		
 	}
 	
 	public int getNumberOfPattern(String solver_id, HashMap<String,String> quiz) throws Exception{
