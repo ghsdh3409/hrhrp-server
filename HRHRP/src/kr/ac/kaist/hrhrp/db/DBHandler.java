@@ -81,13 +81,13 @@ public class DBHandler extends Init {
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) = CURDATE()";
+			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) = DATE_ADD(CURDATE(), INTERVAL -1 DAY)";
 		
 	private final String SELECT_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) != CURDATE()";
+			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) != DATE_ADD(CURDATE(), INTERVAL -1 DAY)";
 	
 	public DBHandler() {
 		init();
