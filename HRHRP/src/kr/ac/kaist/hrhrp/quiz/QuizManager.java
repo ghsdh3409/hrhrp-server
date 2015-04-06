@@ -15,4 +15,8 @@ public class QuizManager {
 	public void updateQuizSolved(int quizId, int solved) {
 		dbTemplate.updateQuizSolved(quizId, solved);
 	}
+	
+	public ArrayList<Quiz> getQuizResult(String ownerId) {
+		return dbTemplate.selectQuizResult(ownerId);
+	}
 }
