@@ -15,11 +15,15 @@ import kr.ac.kaist.hrhrp.type.Person;
 
 public class GetQuizImages {
 
-	private static DBHandler dbTemplate = new DBHandler();
+	private static DBHandler dbTemplate;
 	private static String KEY_CORRECT = "right";
 	private static String KEY_INCORRECT = "wrong";
 
-	public static HashMap<String, ArrayList<Image>> getQuizImages(int templateType, String user) {
+	public GetQuizImages() {
+		dbTemplate = new DBHandler();
+	}
+	
+	public HashMap<String, ArrayList<Image>> getQuizImages(int templateType, String user) {
 		if (templateType == 1) {
 			return getImagesTemplate1(user);
 		} else if (templateType == 2) {
@@ -35,7 +39,7 @@ public class GetQuizImages {
 		}
 	}
 
-	private static HashMap<String, ArrayList<Image>> getImagesTemplate1(String ownerId) {
+	private HashMap<String, ArrayList<Image>> getImagesTemplate1(String ownerId) {
 		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
 
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
@@ -71,7 +75,7 @@ public class GetQuizImages {
 		return quizImages;
 	}
 
-	private static HashMap<String, ArrayList<Image>> getImagesTemplate3(String ownerId) {
+	private HashMap<String, ArrayList<Image>> getImagesTemplate3(String ownerId) {
 		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
 
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
@@ -111,7 +115,7 @@ public class GetQuizImages {
 		return quizImages;
 	}
 
-	private static HashMap<String, ArrayList<Image>> getImagesTemplate2(String ownerId) {
+	private HashMap<String, ArrayList<Image>> getImagesTemplate2(String ownerId) {
 		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
 
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
@@ -145,7 +149,7 @@ public class GetQuizImages {
 		return quizImages;
 	}
 
-	private static HashMap<String, ArrayList<Image>> getImagesTemplate4(String ownerId) {
+	private HashMap<String, ArrayList<Image>> getImagesTemplate4(String ownerId) {
 		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
 
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
@@ -183,7 +187,7 @@ public class GetQuizImages {
 		return quizImages;
 	}
 
-	private static HashMap<String, ArrayList<Image>> getImagesTemplate5(String ownerId) {
+	private HashMap<String, ArrayList<Image>> getImagesTemplate5(String ownerId) {
 		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
 
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
@@ -207,7 +211,7 @@ public class GetQuizImages {
 		return quizImages;
 	}
 
-	private static ArrayList<Image> personalization(ArrayList<Image> images, String ownerId) {
+	private ArrayList<Image> personalization(ArrayList<Image> images, String ownerId) {
 		ArrayList<Image> personalizedImages = new ArrayList<Image>();
 		HashMap<Image, Float> scoredImages = new HashMap<Image, Float>(); 
 
@@ -273,13 +277,13 @@ public class GetQuizImages {
 		return personalizedImages;
 	}
 
-	public static Map sortByValue(Map unsortedMap) {
+	public Map sortByValue(Map unsortedMap) {
 		Map sortedMap = new TreeMap(new ValueComparator(unsortedMap));
 		sortedMap.putAll(unsortedMap);
 		return sortedMap;
 	}
 
-	public static void main(String[] args) {
+	public void main(String[] args) {
 		QuizGen guizGen = new QuizGen();
 		guizGen.generateQuizset(10, "ghsdh3409@gmail.com");
 

@@ -16,6 +16,8 @@ public class QuizGen {
 	
 	private final int SUPPORTED_TEMPLATE_NUM = 5; 
 	
+	GetQuizImages getQuizImages;
+	
 	// 생성자
 	public QuizGen(){
 		jdbc=new JDBC();
@@ -30,6 +32,8 @@ public class QuizGen {
 		default_relation.add("어머니");
 		default_relation.add("친구");
 		default_relation.add("지도교수");
+		
+		getQuizImages = new GetQuizImages();
 	}
 	
 	// 어떤 템플릿의 퀴즈를 출제할 지 결정
@@ -135,7 +139,7 @@ public class QuizGen {
 		
 		// ImageSelector로 부터 퀴즈 생성 관련된 사진들을 얻어옴
 		//public Image(String aUrl, String aImageownerId, String aGroupName)
-		HashMap<String, ArrayList<Image>> selectedImages = GetQuizImages.getQuizImages(template_id, solver_id);
+		HashMap<String, ArrayList<Image>> selectedImages = getQuizImages.getQuizImages(template_id, solver_id);
 		if (selectedImages.get("right").size()==0 && selectedImages.get("wrong").size()==0){
 			System.out.println(template_id+" 번 템플릿에 해당하는 사진 없음!");
 			return false;
