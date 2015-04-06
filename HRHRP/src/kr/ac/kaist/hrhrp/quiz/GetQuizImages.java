@@ -18,7 +18,10 @@ public class GetQuizImages {
 	private static DBHandler dbTemplate;
 	private static String KEY_CORRECT = "right";
 	private static String KEY_INCORRECT = "wrong";
-
+	
+	private ArrayList<Image> mExistedImages;
+	private boolean mIsPersonalized = true;
+	
 	public GetQuizImages() {
 		dbTemplate = new DBHandler();
 	}
@@ -27,7 +30,10 @@ public class GetQuizImages {
 		dbTemplate.close();
 	}
 	
-	public HashMap<String, ArrayList<Image>> getQuizImages(int templateType, String user) {
+	public HashMap<String, ArrayList<Image>> getQuizImages(int templateType, String user, ArrayList<Image> existedImage, boolean isPersonalized) {
+		mExistedImages = existedImage;
+		mIsPersonalized = isPersonalized;
+		
 		if (templateType == 1) {
 			return getImagesTemplate1(user);
 		} else if (templateType == 2) {
@@ -221,7 +227,7 @@ public class GetQuizImages {
 
 		int solvedQuizCnt = dbTemplate.getSolvedQuizCntByUsername(ownerId);
 
-		if (solvedQuizCnt > 0) {
+		if (mIsPersonalized && solvedQuizCnt > 0) {
 
 			String arffPath = "/home/daehoon/HRHRP/personalized/arff/";
 			QuizAnalyzer qa = new QuizAnalyzer(arffPath);
@@ -278,7 +284,24 @@ public class GetQuizImages {
 			Collections.shuffle(personalizedImages);
 		}
 
-		return personalizedImages;
+		ArrayList<Image> uniquePersonalizedImages = new ArrayList<Image>();
+		
+		for (Image personalizedImage : personalizedImages) { //Remove images selected before for quiz.
+			if (mExistedImages.size() > 0) {
+				for (Image existedImage : mExistedImages) {
+					if (existedImage.getUrl() != personalizedImage.getUrl()) {
+						uniquePersonalizedImages.add(personalizedImage);
+					}
+				}
+			} else {
+				uniquePersonalizedImages.add(personalizedImage);
+			}
+		}
+		
+		mExistedImages.add(uniquePersonalizedImages.get(0)); //Add correct image to existedImages.
+		System.out.println("mExistedSize :: " + mExistedImages.size());
+		
+		return uniquePersonalizedImages;
 	}
 
 	public Map sortByValue(Map unsortedMap) {

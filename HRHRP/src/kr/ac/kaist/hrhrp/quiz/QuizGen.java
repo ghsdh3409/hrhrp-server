@@ -85,18 +85,28 @@ public class QuizGen {
 	}
 	
 	// 퀴즈 세트 생성 함수
-	public int generateQuizset(int numOfQuiz, String solver_id){
-		Set failedTemplateSet = new HashSet();
+	public int generateQuizset(int numOfQuiz, String solver_id, float personalizedRatio){
+		Set<Integer> failedTemplateSet = new HashSet<Integer>();
 		int template_id;
 		int curNum=0;
 		// numOfQuiz 개수만큼 퀴즈를 생성하고, DB에 저장한다.
+		
+		int personalizedQuizNum = (int) (numOfQuiz * personalizedRatio); //Personalization + Random
+		boolean isPersonalized = true;
+		
+		ArrayList<Image> existedImages = new ArrayList<Image>(); // This list contains selected image before. DAEHOONKIM
 		
 		while(curNum<numOfQuiz && failedTemplateSet.size() < SUPPORTED_TEMPLATE_NUM){
 			// 퀴즈 템플릿을 선택한다.
 			template_id=selectTemplateID();
 			
+			if (curNum < personalizedQuizNum)
+				isPersonalized = true;
+			else
+				isPersonalized = false;
+			
 			// 퀴즈를 출제하고 DB에 저장한다. 출제 성공하면 퀴즈 수 하나 증가!
-			if (generateQuiz(template_id,solver_id)){
+			if (generateQuiz(template_id,solver_id, existedImages, isPersonalized)){ // This list contains selected image before. DAEHOONKIM
 				curNum++;
 			} else {
 				failedTemplateSet.add(template_id);
@@ -112,7 +122,7 @@ public class QuizGen {
 	
 	
 	// 퀴즈 생성 함수
-	private boolean generateQuiz(int template_id, String solver_id){
+	private boolean generateQuiz(int template_id, String solver_id, ArrayList<Image> existedImages, boolean isPersonalized){
 		
 		String quiz_template="";
 		String quiz_text="";
@@ -138,7 +148,7 @@ public class QuizGen {
 		// ImageSelector로 부터 퀴즈 생성 관련된 사진들을 얻어옴
 		//public Image(String aUrl, String aImageownerId, String aGroupName)
 		GetQuizImages getQuizImages = new GetQuizImages();
-		HashMap<String, ArrayList<Image>> selectedImages = getQuizImages.getQuizImages(template_id, solver_id);
+		HashMap<String, ArrayList<Image>> selectedImages = getQuizImages.getQuizImages(template_id, solver_id, existedImages, isPersonalized); // This list contains selected image before. DAEHOONKIM
 		getQuizImages.close();
 		
 		if (selectedImages.get("right").size()==0 && selectedImages.get("wrong").size()==0){
