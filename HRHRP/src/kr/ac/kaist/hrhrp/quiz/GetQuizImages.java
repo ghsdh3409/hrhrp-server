@@ -18,22 +18,22 @@ public class GetQuizImages {
 	private static DBHandler dbTemplate;
 	private static String KEY_CORRECT = "right";
 	private static String KEY_INCORRECT = "wrong";
-	
+
 	private ArrayList<Image> mExistedImages;
 	private boolean mIsPersonalized = true;
-	
+
 	public GetQuizImages() {
 		dbTemplate = new DBHandler();
 	}
-	
+
 	public void close() {
 		dbTemplate.close();
 	}
-	
+
 	public HashMap<String, ArrayList<Image>> getQuizImages(int templateType, String user, ArrayList<Image> existedImage, boolean isPersonalized) {
 		mExistedImages = existedImage;
 		mIsPersonalized = isPersonalized;
-		
+
 		if (templateType == 1) {
 			return getImagesTemplate1(user);
 		} else if (templateType == 2) {
@@ -62,20 +62,23 @@ public class GetQuizImages {
 
 			personalizedImages = personalization(images, ownerId);
 
-			Image correctImage = personalizedImages.get(0);
-			correctImages.add(correctImage);
+			if (personalizedImages.size() > 0) {
 
-			ArrayList<String> optionSet = new ArrayList<String>();
-			optionSet.add(correctImage.getPersons().get(0).getPersonName());
+				Image correctImage = personalizedImages.get(0);
+				correctImages.add(correctImage);
 
-			for (Image incorrectImage : personalizedImages) {
-				String personName = incorrectImage.getPersons().get(0).getPersonName();
-				if (!optionSet.contains(personName)) {
-					incorrectImages.add(incorrectImage);
-					optionSet.add(personName);
-				}
-				if (incorrectImages.size() > 2) {
-					break;
+				ArrayList<String> optionSet = new ArrayList<String>();
+				optionSet.add(correctImage.getPersons().get(0).getPersonName());
+
+				for (Image incorrectImage : personalizedImages) {
+					String personName = incorrectImage.getPersons().get(0).getPersonName();
+					if (!optionSet.contains(personName)) {
+						incorrectImages.add(incorrectImage);
+						optionSet.add(personName);
+					}
+					if (incorrectImages.size() > 2) {
+						break;
+					}
 				}
 			}
 		}
@@ -96,28 +99,31 @@ public class GetQuizImages {
 		if (images.size() > 0) {
 			personalizedImages = personalization(images, ownerId);
 
-			Image correctImage = personalizedImages.get(0);
-			correctImages.add(correctImage);
+			if (personalizedImages.size() > 0) {
 
-			ArrayList<String> optionSet = new ArrayList<String>();
-			optionSet.add(correctImage.getPersons().get(0).getPersonName());
+				Image correctImage = personalizedImages.get(0);
+				correctImages.add(correctImage);
 
-			for (Image incorrectImage : personalizedImages) {
-				String personName = incorrectImage.getPersons().get(0).getPersonName();
-				if (!optionSet.contains(personName)) {
-					incorrectImages.add(incorrectImage);
-					optionSet.add(personName);
+				ArrayList<String> optionSet = new ArrayList<String>();
+				optionSet.add(correctImage.getPersons().get(0).getPersonName());
+
+				for (Image incorrectImage : personalizedImages) {
+					String personName = incorrectImage.getPersons().get(0).getPersonName();
+					if (!optionSet.contains(personName)) {
+						incorrectImages.add(incorrectImage);
+						optionSet.add(personName);
+					}
+					if (incorrectImages.size() > 2) {
+						break;
+					}
 				}
-				if (incorrectImages.size() > 2) {
-					break;
+
+				while (incorrectImages.size() < 3) {
+					incorrectImages.add(Image.getDefaultImage());
 				}
-			}
 
-			while (incorrectImages.size() < 3) {
-				incorrectImages.add(Image.getDefaultImage());
+				System.out.println(incorrectImages.size());
 			}
-
-			System.out.println(incorrectImages.size());
 		}
 		quizImages.put(KEY_CORRECT, correctImages);
 		quizImages.put(KEY_INCORRECT, incorrectImages);
@@ -136,20 +142,23 @@ public class GetQuizImages {
 		if (images.size() > 0) {
 			personalizedImages = personalization(images, ownerId);
 
-			Image correctImage = personalizedImages.get(0);
-			correctImages.add(correctImage);
+			if (personalizedImages.size() > 0) {
 
-			ArrayList<String> optionSet = new ArrayList<String>();
-			optionSet.add(correctImage.getPersons().get(0).getPersonRelation());
+				Image correctImage = personalizedImages.get(0);
+				correctImages.add(correctImage);
 
-			for (Image incorrectImage : personalizedImages) {
-				String personRelation = incorrectImage.getPersons().get(0).getPersonRelation();
-				if (!optionSet.contains(personRelation)) {
-					incorrectImages.add(incorrectImage);
-					optionSet.add(personRelation);
-				}
-				if (incorrectImages.size() > 2) {
-					break;
+				ArrayList<String> optionSet = new ArrayList<String>();
+				optionSet.add(correctImage.getPersons().get(0).getPersonRelation());
+
+				for (Image incorrectImage : personalizedImages) {
+					String personRelation = incorrectImage.getPersons().get(0).getPersonRelation();
+					if (!optionSet.contains(personRelation)) {
+						incorrectImages.add(incorrectImage);
+						optionSet.add(personRelation);
+					}
+					if (incorrectImages.size() > 2) {
+						break;
+					}
 				}
 			}
 		}
@@ -170,25 +179,28 @@ public class GetQuizImages {
 		if (images.size() > 0) {
 			personalizedImages = personalization(images, ownerId);
 
-			Image correctImage = personalizedImages.get(0);
-			correctImages.add(correctImage);
+			if (personalizedImages.size() > 0) {
 
-			ArrayList<String> optionSet = new ArrayList<String>();
-			optionSet.add(correctImage.getPersons().get(0).getPersonRelation());
+				Image correctImage = personalizedImages.get(0);
+				correctImages.add(correctImage);
 
-			for (Image incorrectImage : personalizedImages) {
-				String personRelation = incorrectImage.getPersons().get(0).getPersonRelation();
-				if (!optionSet.contains(personRelation)) {
-					incorrectImages.add(incorrectImage);
-					optionSet.add(personRelation);
+				ArrayList<String> optionSet = new ArrayList<String>();
+				optionSet.add(correctImage.getPersons().get(0).getPersonRelation());
+
+				for (Image incorrectImage : personalizedImages) {
+					String personRelation = incorrectImage.getPersons().get(0).getPersonRelation();
+					if (!optionSet.contains(personRelation)) {
+						incorrectImages.add(incorrectImage);
+						optionSet.add(personRelation);
+					}
+					if (incorrectImages.size() > 2) {
+						break;
+					}
 				}
-				if (incorrectImages.size() > 2) {
-					break;
-				}
-			}
 
-			while (incorrectImages.size() < 3) {
-				incorrectImages.add(Image.getDefaultImage());
+				while (incorrectImages.size() < 3) {
+					incorrectImages.add(Image.getDefaultImage());
+				}
 			}
 		}
 		quizImages.put(KEY_CORRECT, correctImages);
@@ -209,10 +221,13 @@ public class GetQuizImages {
 		if (images.size() > 0) {
 
 			personalizedImages = personalization(images, ownerId);
-			Image correctImage = personalizedImages.get(0);
-			correctImages.add(correctImage);
 
-			incorrectImages = dbTemplate.selectImagesByTemplate(-5, ownerId);			
+			if (personalizedImages.size() > 0) {
+				Image correctImage = personalizedImages.get(0);
+				correctImages.add(correctImage);
+
+				incorrectImages = dbTemplate.selectImagesByTemplate(-5, ownerId);	
+			}
 		}
 
 		quizImages.put(KEY_CORRECT, correctImages);
@@ -295,7 +310,7 @@ public class GetQuizImages {
 		}
 		System.out.println("AFTER UPI SIZE " + uniquePersonalizedImages.size());
 		mExistedImages.add(uniquePersonalizedImages.get(0)); //Add correct image to existedImages.
-		
+
 		return uniquePersonalizedImages;
 	}
 
