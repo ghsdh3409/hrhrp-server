@@ -1,6 +1,5 @@
 package kr.ac.kaist.hrhrp;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,7 +31,7 @@ public class Extractor extends Init {
 		dbTemplate = new DBHandler();
 	}
 
-	private void close() {
+	public void close() {
 		dbTemplate.close();
 	}
 

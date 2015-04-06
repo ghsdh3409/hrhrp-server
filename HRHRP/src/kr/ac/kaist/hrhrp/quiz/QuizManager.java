@@ -6,7 +6,15 @@ import kr.ac.kaist.hrhrp.db.DBHandler;
 import kr.ac.kaist.hrhrp.type.Quiz;
 
 public class QuizManager {
-	private static DBHandler dbTemplate = new DBHandler();
+	private static DBHandler dbTemplate;
+	
+	public QuizManager() {
+		dbTemplate = new DBHandler();
+	}
+	
+	public void close() {
+		dbTemplate.close();
+	}
 	
 	public ArrayList<Quiz> getQuizes(String ownerId) {
 		return dbTemplate.selectQuiz(ownerId);

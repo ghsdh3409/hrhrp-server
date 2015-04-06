@@ -23,6 +23,10 @@ public class GetQuizImages {
 		dbTemplate = new DBHandler();
 	}
 	
+	public void close() {
+		dbTemplate.close();
+	}
+	
 	public HashMap<String, ArrayList<Image>> getQuizImages(int templateType, String user) {
 		if (templateType == 1) {
 			return getImagesTemplate1(user);
@@ -282,25 +286,6 @@ public class GetQuizImages {
 		sortedMap.putAll(unsortedMap);
 		return sortedMap;
 	}
-
-	public void main(String[] args) {
-		QuizGen guizGen = new QuizGen();
-		guizGen.generateQuizset(10, "ghsdh3409@gmail.com");
-
-		/*
-		HashMap<String, ArrayList<Image>> quizSet = getQuizImages(5, "ghsdh3409@gmail.com");
-		for (Image image : quizSet.get(KEY_CORRECT)) {
-			System.out.println(image.getPersons().get(0).getPersonRelation());
-		}
-
-		System.out.println("--");
-
-		for (Image image : quizSet.get(KEY_INCORRECT)) {
-			System.out.println(image.getPersons().get(0).getPersonRelation());
-		}
-		 */
-	}
-
 }
 
 class ValueComparator implements Comparator {

@@ -16,8 +16,6 @@ public class QuizGen {
 	
 	private final int SUPPORTED_TEMPLATE_NUM = 5; 
 	
-	GetQuizImages getQuizImages;
-	
 	// 생성자
 	public QuizGen(){
 		jdbc=new JDBC();
@@ -32,31 +30,29 @@ public class QuizGen {
 		default_relation.add("어머니");
 		default_relation.add("친구");
 		default_relation.add("지도교수");
-		
-		getQuizImages = new GetQuizImages();
 	}
 	
 	// 어떤 템플릿의 퀴즈를 출제할 지 결정
-	int selectTemplateID(){
+	private int selectTemplateID(){
 		// 랜덤 숫자 생성하도록!
 		return genRandNumber(1,SUPPORTED_TEMPLATE_NUM);
 	}
 	
 	// 퀴즈 출제 날짜 (오늘) 생성
-	String getTodayDate(){
+	private String getTodayDate(){
 		java.util.Date d = new java.util.Date();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd"); 
 		return df.format(d); 
 	}
 	
 	// 1번부터 4번 중, 정답 선택지 번호 생성 (랜덤)
-	int genRandNumber(int min, int max){
+	private int genRandNumber(int min, int max){
 		int r=min + (int)(Math.random() * ((max - min) + 1));
 		return r;
 	}
 	
 	// 퀴즈DB에 퀴즈 추가
-	void quizToDB(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number, String quiz_face, String[] selections_face){
+	private void quizToDB(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number, String quiz_face, String[] selections_face){
 		try {
 			jdbc.insertQuiz(template_id, solver_id, quiz_text, quiz_image, selection_type, selections, answer_number, quiz_face, selections_face);
 		} catch (SQLException e) {
@@ -67,7 +63,7 @@ public class QuizGen {
 	}
 	
 	// 시간으로부터 시간대 구하기
-	String getTimeslot(int hour){
+	private String getTimeslot(int hour){
 		if (hour>=6 && hour<=11) return "아침 (6시~11시)";
 		else if (hour>11 && hour<=14) return "점심 (12시~14시)";
 		else if (hour>14 && hour<=18) return "오후 (15시~18시)";
@@ -77,7 +73,7 @@ public class QuizGen {
 	}
 	
 	// 배열 멤버십 테스트
-	boolean membership(String a, String[] array){
+	private boolean membership(String a, String[] array){
 		for(int i=0;i<array.length;i++){
 			if(array[i]!=null){
 				if(array[i].equals(a)){
@@ -109,12 +105,14 @@ public class QuizGen {
 		
 		System.out.print("FAILED TEMPLATE :: " + failedTemplateSet.toString());
 		
+		jdbc.endConnection();
+		
 		return curNum;
 	}
 	
 	
 	// 퀴즈 생성 함수
-	boolean generateQuiz(int template_id, String solver_id){
+	private boolean generateQuiz(int template_id, String solver_id){
 		
 		String quiz_template="";
 		String quiz_text="";
@@ -139,7 +137,10 @@ public class QuizGen {
 		
 		// ImageSelector로 부터 퀴즈 생성 관련된 사진들을 얻어옴
 		//public Image(String aUrl, String aImageownerId, String aGroupName)
+		GetQuizImages getQuizImages = new GetQuizImages();
 		HashMap<String, ArrayList<Image>> selectedImages = getQuizImages.getQuizImages(template_id, solver_id);
+		getQuizImages.close();
+		
 		if (selectedImages.get("right").size()==0 && selectedImages.get("wrong").size()==0){
 			System.out.println(template_id+" 번 템플릿에 해당하는 사진 없음!");
 			return false;
