@@ -288,7 +288,7 @@ public class JDBC {
 	
 	public void setConnection(){
 		try{
-			String jdbcUrl="jdbc:mysql://143.248.91.79:3306/hrhrp?characterEncoding=euckr&autoReconnection=true";
+			String jdbcUrl="jdbc:mysql://143.248.91.79:3306/hrhrp?characterEncoding=euckr&autoReconnect=true";
 			String userId="mschoy";
 			String userPass="minsoo";
 			conn=DriverManager.getConnection(jdbcUrl,userId,userPass);

@@ -18,7 +18,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 
 public class DBHandler extends Init {
 		
-	private final String url = "jdbc:mysql://kse-dm2.kaist.ac.kr/hrhrp?user=mschoy&password=minsoo&autoReconnection=true";
+	private final String url = "jdbc:mysql://kse-dm2.kaist.ac.kr/hrhrp?user=mschoy&password=minsoo&autoReconnect=true";
 	private final String className = "com.mysql.jdbc.Driver";
 	
 	private Connection conn = null;
