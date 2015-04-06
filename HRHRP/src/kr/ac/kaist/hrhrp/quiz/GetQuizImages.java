@@ -284,22 +284,17 @@ public class GetQuizImages {
 			Collections.shuffle(personalizedImages);
 		}
 
-		ArrayList<Image> uniquePersonalizedImages = new ArrayList<Image>();
-		
+		ArrayList<Image> uniquePersonalizedImages = (ArrayList<Image>) personalizedImages.clone();
+		System.out.println("PREV UPI SIZE " + uniquePersonalizedImages.size());
 		for (Image personalizedImage : personalizedImages) { //Remove images selected before for quiz.
-			if (mExistedImages.size() > 0) {
-				for (Image existedImage : mExistedImages) {
-					if (existedImage.getUrl() != personalizedImage.getUrl()) {
-						uniquePersonalizedImages.add(personalizedImage);
-					}
+			for (Image existedImage : mExistedImages) {
+				if (existedImage.getUrl().equals(personalizedImage.getUrl())) {
+					uniquePersonalizedImages.remove(personalizedImage);
 				}
-			} else {
-				uniquePersonalizedImages.add(personalizedImage);
 			}
 		}
-		
+		System.out.println("AFTER UPI SIZE " + uniquePersonalizedImages.size());
 		mExistedImages.add(uniquePersonalizedImages.get(0)); //Add correct image to existedImages.
-		System.out.println("mExistedSize :: " + mExistedImages.size());
 		
 		return uniquePersonalizedImages;
 	}
