@@ -299,10 +299,14 @@ public class JDBC {
 	
 	public void endConnection(){
 		try{
-			rs.close();
-			stmt.close();
-			pstmt.close();
-			conn.close();
+			if (rs != null)
+				rs.close();
+			if (stmt != null)
+				stmt.close();
+			if (pstmt != null)
+				pstmt.close();
+			if (conn != null)
+				conn.close();
 		} catch(Exception e){
 			e.printStackTrace();
 		}
