@@ -309,7 +309,9 @@ public class GetQuizImages {
 			}
 		}
 		System.out.println("AFTER UPI SIZE " + uniquePersonalizedImages.size());
-		mExistedImages.add(uniquePersonalizedImages.get(0)); //Add correct image to existedImages.
+		
+		if (uniquePersonalizedImages.size() > 0)
+			mExistedImages.add(uniquePersonalizedImages.get(0)); //Add correct image to existedImages.
 
 		return uniquePersonalizedImages;
 	}
