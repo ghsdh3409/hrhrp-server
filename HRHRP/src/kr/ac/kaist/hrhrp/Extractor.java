@@ -92,7 +92,8 @@ public class Extractor extends Init {
 
 		for (String newPersonId : newPersonIds) {
 			Person newPerson = dbTemplate.selectFacesPerson(newPersonId);
-			newPersons.add(newPerson);
+			if (newPerson != null)
+				newPersons.add(newPerson);
 		}
 
 		return newPersons;
@@ -105,8 +106,12 @@ public class Extractor extends Init {
 		ArrayList<Person> newPersons = new ArrayList<Person>();
 
 		for (String newPersonId : newPersonIds) {
-			Person newPerson = new Person(newPersonId, KEY_PERSON_ID);
-			newPersons.add(newPerson);
+			try {
+				Person newPerson = new Person(newPersonId, KEY_PERSON_ID);
+				newPersons.add(newPerson);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		return newPersons;
@@ -117,12 +122,15 @@ public class Extractor extends Init {
 		Person person = fr.personUpdate(personId, personName);
 		if (person != null) {
 			if (personId.equals(person.getPersonId())){ // New Person
-				System.out.println("NEW");
+				System.out.println("UPDATE PERSON :: NEW");
 				dbTemplate.updatePersonName(person.getPersonName(), person.getPersonId());
 			} else { // Existed User
-				System.out.println("EXISTED");
+				System.out.println("UPDATE PERSON :: EXISTED");
 				dbTemplate.updatePersonId(person.getPersonId(), personId);
 			}
+		} else { //When the error is occured, the new user information is deleted.
+			System.out.println("UPDATE PERSON :: REMOVE INVALID NEW PERSON");
+			dbTemplate.deletePerson(personId);
 		}
 
 	}

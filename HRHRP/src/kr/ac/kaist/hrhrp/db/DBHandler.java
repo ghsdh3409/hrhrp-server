@@ -40,7 +40,10 @@ public class DBHandler extends Init {
 	private final String UPDATE_PERSON_RELATION_SQL = "UPDATE PersonPerson SET relationship = ? WHERE owner_id = ? and person_id = ?";
 	
 	private final String UPDATE_PHOTO_PERSON_SQL = "UPDATE PhotoPerson SET person_id = ? WHERE person_id = ?";
-	private final String UPDATE_PERSON_PERSON_SQL = "UPDATE PersonPerson SET person_id = ? WHERE person_id = ?";
+	private final String UPDATE_PERSON_PERSON_BY_ONWER_PERSON_SQL = "UPDATE PersonPerson SET person_id = ? WHERE owner_id =? and person_id = ?";
+	private final String SELECT_PERSON_PERSON_BY_PERSON_SQL = "SELECT * FROM PersonPerson WHERE person_id = ?";
+	private final String SELECT_PERSON_PERSON_BY_OWNER_PERSON_SQL = "SELECT * FROM PersonPerson WHERE owner_id=? and person_id = ?";
+	private final String DELETE_PERSON_PERSON_BY_OWNER_PERSON_SQL = "DELETE FROM PersonPerson WHERE owner_id = ? and person_id = ?";
 	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id, face_id, width, height, center_x, center_y) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE url = ?";
 	
@@ -269,14 +272,15 @@ public class DBHandler extends Init {
 	}
 	
 	public Person selectFacesPerson(String aPersonId) {
-		Person person = new Person();
+		Person person = null;
 		PreparedStatement ps;
-		try {
+		try {			
 			ps = conn.prepareStatement(SELECT_PHOTO_PERSON_SQL);
 			ps.setString(1, aPersonId);
 			ResultSet rs = ps.executeQuery();
 				
 			while(rs.next()) {
+				person = new Person();
 				String imageUrl = rs.getString("photo_id");
 				String personId = rs.getString("person_id");
 				String faceId = rs.getString("face_id");
@@ -366,15 +370,72 @@ public class DBHandler extends Init {
 			ps.setString(2, deletedId);
 			ps.executeUpdate();
 			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			//Verify that there is a same key USER + PERSON ID
 			
-			ps = conn.prepareStatement(UPDATE_PERSON_PERSON_SQL);
-			ps.setString(1, existedId);
-			ps.setString(2, deletedId);
-			ps.executeUpdate();
+			ps = conn.prepareStatement(SELECT_PERSON_PERSON_BY_PERSON_SQL);
+			ps.setString(1, deletedId);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				String ownerId = rs.getString("owner_id");
+				String relationship = rs.getString("relationship");
+				PreparedStatement ps1 = conn.prepareStatement(SELECT_PERSON_PERSON_BY_OWNER_PERSON_SQL);
+				ps1.setString(1, ownerId);
+				ps1.setString(2, existedId);
+				ResultSet rs1 = ps1.executeQuery();
+				if (rs1.first()) { // if existed, DELETE existed records
+					String existedOwnerId = rs1.getString("owner_id");
+					String existedPersonId = rs1.getString("person_id");
+					if (relationship == null) {
+						PreparedStatement ps2 = conn.prepareStatement(DELETE_PERSON_PERSON_BY_OWNER_PERSON_SQL);
+						ps2.setString(1, existedOwnerId);
+						ps2.setString(2, deletedId);
+						ps2.executeUpdate();
+						ps2.close();
+					} else {
+						PreparedStatement ps2 = conn.prepareStatement(DELETE_PERSON_PERSON_BY_OWNER_PERSON_SQL);
+						ps2.setString(1, existedOwnerId);
+						ps2.setString(2, existedPersonId);
+						ps2.executeUpdate();
+						ps2.close();
+						
+						PreparedStatement ps3 = conn.prepareStatement(UPDATE_PERSON_PERSON_BY_ONWER_PERSON_SQL); //then, UPDATE_PERSON_PERSON_SQL
+						ps3.setString(1, existedId);
+						ps3.setString(2, ownerId);
+						ps3.setString(3, deletedId);
+						ps3.executeUpdate();
+						ps3.close();
+						
+					}			
+				}
+				ps1.close();
+			}
+			rs.close();
 			ps.close();
-			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
 			ps = conn.prepareStatement(DELETE_PERSON_INFO_SQL);
 			ps.setString(1, deletedId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void deletePerson(String personId) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(DELETE_PERSON_INFO_SQL);
+			ps.setString(1, personId);
 			ps.executeUpdate();
 			ps.close();
 		} catch (Exception e) {
