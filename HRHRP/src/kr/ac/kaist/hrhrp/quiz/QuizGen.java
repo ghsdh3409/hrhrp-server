@@ -18,8 +18,8 @@ public class QuizGen {
 	private ArrayList<String> default_relation=new ArrayList<String>();
 
 	private final int SUPPORTED_TEMPLATE_NUM = 5; 
-	private final String ARFF_PATH = "D:/arff/";
-	//private final String ARFF_PATH = "/home/daehoon/HRHRP/personalized/arff/";
+	//private final String ARFF_PATH = "D:/arff/";
+	private final String ARFF_PATH = "/home/daehoon/HRHRP/personalized/arff/";
 	// 생성자
 	public QuizGen(){
 		jdbc=new JDBC();
