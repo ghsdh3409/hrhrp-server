@@ -303,13 +303,19 @@ public class GetQuizImages {
 		System.out.println("PREV UPI SIZE " + uniquePersonalizedImages.size());
 		for (Image personalizedImage : personalizedImages) { //Remove images selected before for quiz.
 			for (Image existedImage : mExistedImages) {
-				if (existedImage.getUrl().equals(personalizedImage.getUrl())) {
-					uniquePersonalizedImages.remove(personalizedImage);
+				if (existedImage.getPersons().size() > 0) {
+					if (existedImage.getPersons().get(0).getPersonId().equals(personalizedImage.getPersons().get(0).getPersonId())) {
+						uniquePersonalizedImages.remove(personalizedImage);
+					}
+				} else {
+					if (existedImage.getUrl().equals(personalizedImage.getUrl())) {
+						uniquePersonalizedImages.remove(personalizedImage);
+					}
 				}
 			}
 		}
 		System.out.println("AFTER UPI SIZE " + uniquePersonalizedImages.size());
-		
+
 		if (uniquePersonalizedImages.size() > 0)
 			mExistedImages.add(uniquePersonalizedImages.get(0)); //Add correct image to existedImages.
 
