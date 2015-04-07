@@ -56,8 +56,6 @@ public class DBHandler extends Init {
 	private final String SELECT_FACE_SQL = "SELECT PhotoPerson.* FROM PhotoPerson Where face_id = ?";
 	private final String UPDATE_QUIZ_SOLVED_SQL = "UPDATE Quiz SET solved = ? WHERE quiz_id = ?";
 	
-	
-	//TODO : Select Images By Templates
 	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
@@ -93,6 +91,43 @@ public class DBHandler extends Init {
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) != DATE_ADD(CURDATE(), INTERVAL -1 DAY)";
+	
+	private final String SELECT_ALL_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE Person.name is not null LIMIT 100";
+	
+	private final String SELECT_ALL_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE PersonPerson.relationship is not null LIMIT 100";
+	
+	private final String SELECT_ALL_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE Person.name is not null LIMIT 100";
+	
+	private final String SELECT_ALL_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE PersonPerson.relationship is not null LIMIT 100";
+	
+	private final String SELECT_ALL_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE DATE(Photo.taken_at) = DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 100";
+		
+	private final String SELECT_ALL_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
+			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
+			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
+			+ "WHERE DATE(Photo.taken_at) != DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 100";
+	
 	
 	public DBHandler() {
 		init();
@@ -520,7 +555,72 @@ public class DBHandler extends Init {
 		}
 	}
 	
-	public ArrayList<Image> selectImagesByTemplate(int templateType, String mOwnerId) {
+	public ArrayList<Image> selectAllImagesByTemplateId(int templateType) {
+		PreparedStatement ps = null;
+		ArrayList<Image> images = new ArrayList<Image>();
+		try {
+			if (templateType == 1) {
+				ps = conn.prepareStatement(SELECT_ALL_PHOTO_BY_T1);
+			} else if (templateType == 2) {
+				ps = conn.prepareStatement(SELECT_ALL_PHOTO_BY_T2);
+			} else if (templateType == 3) {
+				ps = conn.prepareStatement(SELECT_ALL_PHOTO_BY_T3);
+			} else if (templateType == 4) {
+				ps = conn.prepareStatement(SELECT_ALL_PHOTO_BY_T4);
+			} else if (templateType == 5) {
+				ps = conn.prepareStatement(SELECT_ALL_PHOTO_BY_T5);
+			} else if (templateType == -5) {
+				ps = conn.prepareStatement(SELECT_ALL_PHOTO_BY_T5_NOT);
+			}
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				String url = rs.getString("photo_id");
+				String ownerId = rs.getString("owner_id");
+				String city = rs.getString("city");
+				String district = rs.getString("district");
+				String street = rs.getString("street");
+				Date takenAt = rs.getTimestamp("taken_at");
+				String weather = rs.getString("weather");
+				
+				Image image = new Image(url, ownerId, groupName);
+				image.setAddress(city, district, street);
+				image.setImageTime(takenAt);
+				image.setWeather(weather);
+				
+				String personId = rs.getString("person_id");
+				String name = rs.getString("name");
+				String relationship = rs.getString("relationship");
+				
+				Person person = new Person();
+				person.setPersonId(personId);
+				person.setPersonName(name);
+				person.setPersonRelation(relationship);
+				
+				String faceId = rs.getString("face_id");
+				double width = rs.getDouble("width");
+				double height = rs.getDouble("height");
+				double center_x = rs.getDouble("center_x");
+				double center_y = rs.getDouble("center_y");
+				
+				Face face = new Face();
+				face.setFaceId(faceId);
+				face.setPosition(width, height, center_x, center_y);
+			
+				person.addFace(face);
+				image.addPerson(person);
+				
+				images.add(image);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return images;
+	}	
+	
+	public ArrayList<Image> selectImagesByTemplateIdOwner(int templateType, String mOwnerId) {
 		PreparedStatement ps = null;
 		ArrayList<Image> images = new ArrayList<Image>();
 		try {

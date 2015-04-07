@@ -23,7 +23,7 @@ public class GetQuizImages {
 	private boolean mIsPersonalized = true;
 
 	private String mArffPath;
-	
+
 	public GetQuizImages(String arffPath) {
 		dbTemplate = new DBHandler();
 		mArffPath = arffPath;
@@ -59,8 +59,8 @@ public class GetQuizImages {
 		ArrayList<Image> correctImages = new ArrayList<Image>();
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
-		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(1, ownerId);
-		
+		ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(1, ownerId);
+
 		if (images.size() > 0) {
 
 			personalizedImages = personalization(images, ownerId);
@@ -98,7 +98,7 @@ public class GetQuizImages {
 		ArrayList<Image> correctImages = new ArrayList<Image>();
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
-		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(1, ownerId);
+		ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(3, ownerId);
 		if (images.size() > 0) {
 			personalizedImages = personalization(images, ownerId);
 
@@ -121,11 +121,8 @@ public class GetQuizImages {
 					}
 				}
 
-				while (incorrectImages.size() < 3) {
-					incorrectImages.add(Image.getDefaultImage());
-				}
-
-				System.out.println(incorrectImages.size());
+				if (incorrectImages.size() < 4)
+					addIncorrectImageforTemplate(3, ownerId, 4, incorrectImages, correctImage);
 			}
 		}
 		quizImages.put(KEY_CORRECT, correctImages);
@@ -141,7 +138,7 @@ public class GetQuizImages {
 		ArrayList<Image> correctImages = new ArrayList<Image>();
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
-		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(2, ownerId);
+		ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(2, ownerId);
 		if (images.size() > 0) {
 			personalizedImages = personalization(images, ownerId);
 
@@ -178,7 +175,7 @@ public class GetQuizImages {
 		ArrayList<Image> correctImages = new ArrayList<Image>();
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
-		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(2, ownerId);
+		ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(4, ownerId);
 		if (images.size() > 0) {
 			personalizedImages = personalization(images, ownerId);
 
@@ -201,9 +198,8 @@ public class GetQuizImages {
 					}
 				}
 
-				while (incorrectImages.size() < 3) {
-					incorrectImages.add(Image.getDefaultImage());
-				}
+				if (incorrectImages.size() < 4)
+					addIncorrectImageforTemplate(3, ownerId, 4, incorrectImages, correctImage);
 			}
 		}
 		quizImages.put(KEY_CORRECT, correctImages);
@@ -219,8 +215,8 @@ public class GetQuizImages {
 		ArrayList<Image> correctImages = new ArrayList<Image>();
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
-		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(5, ownerId);
-		
+		ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(5, ownerId);
+
 		if (images.size() > 0) {
 
 			personalizedImages = personalization(images, ownerId);
@@ -229,7 +225,7 @@ public class GetQuizImages {
 				Image correctImage = personalizedImages.get(0);
 				correctImages.add(correctImage);
 
-				incorrectImages = dbTemplate.selectImagesByTemplate(-5, ownerId);	
+				incorrectImages = dbTemplate.selectImagesByTemplateIdOwner(-5, ownerId);	
 			}
 		}
 
@@ -237,6 +233,67 @@ public class GetQuizImages {
 		quizImages.put(KEY_INCORRECT, incorrectImages);
 
 		return quizImages;
+	}
+
+	private boolean isEqualImage(Image existedImage, Image image) {
+		String imagePersonId = image.getPersons().get(0).getPersonId();
+		String imageRelation = image.getPersons().get(0).getPersonRelation();
+		String existedPersonId = existedImage.getPersons().get(0).getPersonId();
+		String existedRelation = existedImage.getPersons().get(0).getPersonRelation();	
+		if(existedPersonId.equals(imagePersonId) || existedRelation.equals(imageRelation)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private boolean isImageContain(ArrayList<Image> imageList, Image image) {
+		String imagePersonId = image.getPersons().get(0).getPersonId();
+		String imageRelation = image.getPersons().get(0).getPersonRelation();
+		for (Image existedImage : imageList) {
+			String existedPersonId = existedImage.getPersons().get(0).getPersonId();
+			String existedRelation = existedImage.getPersons().get(0).getPersonRelation();	
+			if(existedPersonId.equals(imagePersonId) || existedRelation.equals(imageRelation)) {
+				return true;
+			}
+		}
+		return false;		
+	}
+	
+	private void addIncorrectImageforTemplate(int templateId, String ownerId, int incorrectImageSize, ArrayList<Image> incorrectImages, Image correctImage) {
+		ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(templateId, ownerId);		
+		Collections.shuffle(images);
+
+		for (int i=0; i<images.size(); i++) {
+			if (incorrectImages.size() < incorrectImageSize) {
+				Image candidateImage = images.get(i);
+				if (!isEqualImage(correctImage, candidateImage)) {
+					if (!isImageContain(incorrectImages, candidateImage)) {
+						incorrectImages.add(candidateImage);
+					}
+				}
+			} else {
+				break;
+			}
+		}
+		
+		if (incorrectImages.size() < incorrectImageSize) {
+			images = dbTemplate.selectAllImagesByTemplateId(templateId);
+			Collections.shuffle(images);
+			
+			for (int i=0; i<images.size(); i++) {
+				if (incorrectImages.size() < incorrectImageSize) {
+					Image candidateImage = images.get(i);
+					if (!isEqualImage(correctImage, candidateImage)) {
+						if (!isImageContain(incorrectImages, candidateImage)) {
+							incorrectImages.add(candidateImage);
+						}
+					}
+				} else {
+					break;
+				}
+			}
+		}
 	}
 
 	private ArrayList<Image> personalization(ArrayList<Image> images, String ownerId) {
