@@ -22,8 +22,11 @@ public class GetQuizImages {
 	private ArrayList<Image> mExistedImages;
 	private boolean mIsPersonalized = true;
 
-	public GetQuizImages() {
+	private String mArffPath;
+	
+	public GetQuizImages(String arffPath) {
 		dbTemplate = new DBHandler();
+		mArffPath = arffPath;
 	}
 
 	public void close() {
@@ -57,7 +60,7 @@ public class GetQuizImages {
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
 		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(1, ownerId);
-
+		
 		if (images.size() > 0) {
 
 			personalizedImages = personalization(images, ownerId);
@@ -217,7 +220,7 @@ public class GetQuizImages {
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
 		ArrayList<Image> images = dbTemplate.selectImagesByTemplate(5, ownerId);
-
+		
 		if (images.size() > 0) {
 
 			personalizedImages = personalization(images, ownerId);
@@ -244,13 +247,10 @@ public class GetQuizImages {
 
 		if (mIsPersonalized && solvedQuizCnt > 0) {
 
-			String arffPath = "/home/daehoon/HRHRP/personalized/arff/";
-			QuizAnalyzer qa = new QuizAnalyzer(arffPath);
-			MultilevelAssociationMiner ruleMiner=new MultilevelAssociationMiner(arffPath);
+			MultilevelAssociationMiner ruleMiner=new MultilevelAssociationMiner(mArffPath);
 			PersonalizationScoreCalculator psc=new PersonalizationScoreCalculator();
 
 			try {
-				qa.analyzeQuiz(ownerId);
 				HashMap<Integer, ArrayList<HashMap<String,String>>> itemsets=ruleMiner.startMining(ownerId);
 				psc.setFreqItemsets(itemsets);
 			} catch (Exception e1) {

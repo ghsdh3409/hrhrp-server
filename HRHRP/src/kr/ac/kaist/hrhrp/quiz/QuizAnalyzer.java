@@ -12,11 +12,99 @@ public class QuizAnalyzer {
 	
 	private String mARFFPath;
 	
+	public QuizAnalyzer(){
+		jdbc=new JDBC();
+		jdbc.setConnection();
+	}
+	
 	public QuizAnalyzer(String arffPath){
 		jdbc=new JDBC();
 		jdbc.setConnection();
 		
 		mARFFPath = arffPath;
+	}
+	
+	public void close() {
+		if (jdbc != null) {
+			jdbc.endConnection();
+		}
+	}
+	
+	public void updateQuizFeature(String userId) throws Exception {
+		int template_id, quiz_id, isCorrect;
+		String photo_id="", face_id="", person_id="", weather="", timeslot="", location="";
+		String parent_person="", parent_weather="", parent_time="", parent_location="";
+		HashMap<String,String> quiz, photoInfo;
+		
+		setUserID(userId);
+		ArrayList<HashMap<String,String>> quizList=jdbc.getQuizOfUser(user_id);
+		
+		// 각 퀴즈마다
+		for(int i=0;i<quizList.size();i++){
+			quiz=quizList.get(i);
+			quiz_id=Integer.parseInt(quiz.get("quiz_id"));
+			template_id=Integer.parseInt(quiz.get("template_id"));
+			
+			// template1~template5: 사람과 관련된 질문!
+			if(template_id>=1 && template_id<=5){
+				if(template_id==1 || template_id==2 || template_id==5){
+					photo_id=quiz.get("quiz_image");
+					face_id=quiz.get("quiz_face");
+				}
+				else if(template_id==3 || template_id==4){
+					photo_id=quiz.get("selection");
+					face_id=quiz.get("selection_face");
+				}
+				person_id=jdbc.getPersonInPhoto(photo_id,face_id);
+			}
+			else{
+				person_id="사람없음";
+			}
+			
+			photoInfo=jdbc.getPhotoInfo(photo_id);
+			// 날씨, 시간대, 장소
+			weather=getWeather(photoInfo.get("weather"));
+			timeslot=getTimeSlot(photoInfo.get("date"));
+			location=photoInfo.get("street");
+			
+			// 정답인지 오답인지.
+			if(quiz.get("answer").equals(quiz.get("solved"))) isCorrect=1;
+			else isCorrect=0;
+			
+			// DB에 넣기!
+			try{
+				// level 3
+				jdbc.insertQuizFeature(quiz_id, template_id, user_id, 3, person_id, weather, timeslot, location, isCorrect);
+				
+				// level 2
+				if(template_id>=1 && template_id<=5){
+					parent_person=jdbc.getRelationshipBtwn(user_id, person_id);
+				}
+				else{
+					parent_person="사람없음";
+				}
+				parent_weather=jdbc.getParentFeature(weather,3,"날씨");
+				parent_time=jdbc.getParentFeature(timeslot,3,"시간");
+				parent_location=jdbc.getParentFeature(location,3,"장소");
+				jdbc.insertQuizFeature(quiz_id, template_id, user_id, 2, parent_person, parent_weather, parent_time, parent_location, isCorrect);
+				
+				// level 1
+				if(template_id>=1 && template_id<=5){
+					parent_person="사람있음";
+				}
+				else{
+					parent_person="사람없음";
+				}
+				parent_weather=jdbc.getParentFeature(parent_weather,2,"날씨");
+				parent_time=jdbc.getParentFeature(parent_time,2,"시간");
+				parent_location=jdbc.getParentFeature(parent_location,2,"장소");
+				jdbc.insertQuizFeature(quiz_id, template_id, user_id, 1, parent_person, parent_weather, parent_time, parent_location, isCorrect);
+			}
+			catch(Exception e){
+				// Insertion시 Primary Key 에러 날 수 있으므로.
+				// Do Nothing!
+			}
+		}
 	}
 	
 	// Quiz분석 및 QuizFeature 테이블 채우기
@@ -64,7 +152,7 @@ public class QuizAnalyzer {
 			// DB에 넣기!
 			try{
 				// level 3
-				jdbc.insertQuizFeature(quiz_id, user_id, 3, person_id, weather, timeslot, location, isCorrect);
+				jdbc.insertQuizFeature(quiz_id, template_id, user_id, 3, person_id, weather, timeslot, location, isCorrect);
 				
 				// level 2
 				if(template_id>=1 && template_id<=5){
@@ -76,7 +164,7 @@ public class QuizAnalyzer {
 				parent_weather=jdbc.getParentFeature(weather,3,"날씨");
 				parent_time=jdbc.getParentFeature(timeslot,3,"시간");
 				parent_location=jdbc.getParentFeature(location,3,"장소");
-				jdbc.insertQuizFeature(quiz_id, user_id, 2, parent_person, parent_weather, parent_time, parent_location, isCorrect);
+				jdbc.insertQuizFeature(quiz_id, template_id, user_id, 2, parent_person, parent_weather, parent_time, parent_location, isCorrect);
 				
 				// level 1
 				if(template_id>=1 && template_id<=5){
@@ -88,7 +176,7 @@ public class QuizAnalyzer {
 				parent_weather=jdbc.getParentFeature(parent_weather,2,"날씨");
 				parent_time=jdbc.getParentFeature(parent_time,2,"시간");
 				parent_location=jdbc.getParentFeature(parent_location,2,"장소");
-				jdbc.insertQuizFeature(quiz_id, user_id, 1, parent_person, parent_weather, parent_time, parent_location, isCorrect);
+				jdbc.insertQuizFeature(quiz_id, template_id, user_id, 1, parent_person, parent_weather, parent_time, parent_location, isCorrect);
 			}
 			catch(Exception e){
 				// Insertion시 Primary Key 에러 날 수 있으므로.

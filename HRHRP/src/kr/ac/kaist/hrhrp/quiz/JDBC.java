@@ -18,7 +18,7 @@ public class JDBC {
 	private final String getPhotoCntByUsernameSQL = "SELECT count(*) FROM Photo WHERE owner_id=?"; //ADDED BY DAEHOONKIM for verifying if existing photo
 	private final String getTemplateSQL="SELECT template FROM Template WHERE template_id=?";
 	private final String addQuizToDBSQL="INSERT INTO Quiz (template_id, solver_id, quiz_text, quiz_image, selection_type, selection1, selection2, selection3, selection4, answer, solved, quiz_face, selection1_face, selection2_face, selection3_face, selection4_face) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-	private final String addQuizFeatureToDBSQL="INSERT INTO QuizFeature (quiz_id, solver_id, level, person, weather, time, location, correct) VALUES (?,?,?,?,?,?,?,?)";
+	private final String addQuizFeatureToDBSQL="INSERT INTO QuizFeature (quiz_id, template_id, solver_id, level, person, weather, time, location, correct) VALUES (?,?,?,?,?,?,?,?,?)";
 	private final String getRelationSQL="SELECT relationship FROM PersonPerson WHERE owner_id=? AND person_id=?";
 	private final String getParentFeatureSQL="SELECT parent FROM Tree WHERE feature=? and level=? and type=?";
 	private final String getQuizOfUser="SELECT * FROM Quiz WHERE solver_id=? and solved != 0";
@@ -34,6 +34,8 @@ public class JDBC {
 	
 	private final String getNumberOfPatternSQL="SELECT count(*) as cnt FROM QuizFeature WHERE solver_id=? and person=? and weather=? and time=? and location=?";
 	private final String getWrongNumberOfPatternSQL="SELECT count(*) as cnt FROM QuizFeature WHERE solver_id=? and person=? and weather=? and time=? and location=? and correct=0";
+	
+	private final String getCorrectInfoSQL="SELECT correct FROM QuizFeature WHERE solver_id=? and template_id=?";
 	
 	public JDBC(){
 		try {
@@ -273,17 +275,30 @@ public class JDBC {
 		pstmt.executeUpdate();
 	}
 	
-	public void insertQuizFeature(int quiz_id, String solver_id, int level, String person, String weather, String time, String location, int correct) throws SQLException{
+	public void insertQuizFeature(int quiz_id, int template_id, String solver_id, int level, String person, String weather, String time, String location, int correct) throws SQLException{
 		pstmt=conn.prepareStatement(addQuizFeatureToDBSQL);
 		pstmt.setInt(1, quiz_id);
-		pstmt.setString(2, solver_id);
-		pstmt.setInt(3, level);
-		pstmt.setString(4, person);
-		pstmt.setString(5, weather);
-		pstmt.setString(6, time);
-		pstmt.setString(7, location);
-		pstmt.setInt(8, correct);
+		pstmt.setInt(2, template_id);
+		pstmt.setString(3, solver_id);
+		pstmt.setInt(4, level);
+		pstmt.setString(5, person);
+		pstmt.setString(6, weather);
+		pstmt.setString(7, time);
+		pstmt.setString(8, location);
+		pstmt.setInt(9, correct);
 		pstmt.executeUpdate();
+	}
+	
+	public ArrayList<Integer> getCorrectInfoOfTemplateID(String solver_id, int template_id) throws Exception{
+		ArrayList<Integer> correctInfoList=new ArrayList<Integer>();
+		pstmt=conn.prepareStatement(getCorrectInfoSQL);
+		pstmt.setString(1, solver_id);
+		pstmt.setInt(2, template_id);
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			correctInfoList.add(rs.getInt("correct"));
+		}
+		return correctInfoList;
 	}
 	
 	public void setConnection(){
