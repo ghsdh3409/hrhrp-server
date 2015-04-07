@@ -40,6 +40,7 @@ public class DBHandler extends Init {
 	private final String UPDATE_PERSON_RELATION_SQL = "UPDATE PersonPerson SET relationship = ? WHERE owner_id = ? and person_id = ?";
 	
 	private final String UPDATE_PHOTO_PERSON_SQL = "UPDATE PhotoPerson SET person_id = ? WHERE person_id = ?";
+	private final String UPDATE_PERSON_PERSON_SQL = "UPDATE PersonPerson SET person_id = ? WHERE person_id = ?";
 	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id, face_id, width, height, center_x, center_y) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE url = ?";
 	
@@ -361,6 +362,12 @@ public class DBHandler extends Init {
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(UPDATE_PHOTO_PERSON_SQL);
+			ps.setString(1, existedId);
+			ps.setString(2, deletedId);
+			ps.executeUpdate();
+			ps.close();
+			
+			ps = conn.prepareStatement(UPDATE_PERSON_PERSON_SQL);
 			ps.setString(1, existedId);
 			ps.setString(2, deletedId);
 			ps.executeUpdate();
