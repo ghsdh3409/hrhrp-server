@@ -131,8 +131,8 @@ public class Extractor extends Init {
 					String correctPersonId = person.getPersonId();
 					String correctPersonName = person.getPersonName();
 
-					dbTemplate.insertPersonInfo(correctPersonId, correctPersonName);
-					dbTemplate.insertPersonRelation(ownerId, correctPersonId, relation);
+					dbTemplate.insertPersonInfoWithUpdate(correctPersonId, correctPersonName);
+					dbTemplate.insertPersonRelationWithUpdate(ownerId, correctPersonId, relation);
 					dbTemplate.updatePhotoPersonByPhoto(photoId, correctPersonId, personId);
 				} else { //When the error is occured, the new user information is deleted.
 					System.out.println("UPDATE PERSON :: REMOVE INVALID NEW PERSON");
