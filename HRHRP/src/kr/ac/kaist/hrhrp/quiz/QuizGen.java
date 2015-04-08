@@ -411,8 +411,10 @@ public class QuizGen {
 					answer_number=1;
 				}
 				else{
-					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
-					answer_number=2;
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+						answer_number=2;
+					}
 				}
 			}
 		}
@@ -431,7 +433,9 @@ public class QuizGen {
 					selections[i]=selectedImages.get("right").get(0).getUrl();						// 정답
 				}
 				else{
-					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					}
 				}
 			}
 		}
@@ -448,7 +452,9 @@ public class QuizGen {
 					selections[i]=selectedImages.get("right").get(0).getUrl();	// 정답
 				}
 				else{
-					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					}
 				}
 			}
 		}
