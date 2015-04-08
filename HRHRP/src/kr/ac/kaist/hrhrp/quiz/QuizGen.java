@@ -50,7 +50,7 @@ public class QuizGen {
 	private ArrayList<Integer> getNormalizedRatioCntofTemplateId (String userId) {
 		HashMap<Integer, Float> ratioListofTemplate = generateListWrongRatioOfTemplateId(userId);
 		System.out.println("WrongRationList " + ratioListofTemplate.values());
-		
+
 		ArrayList<Integer> templateDistributionList = new ArrayList<Integer>();
 
 		for (int templateId : ratioListofTemplate.keySet()) {
@@ -153,7 +153,7 @@ public class QuizGen {
 			boolean isPersonalized = true;
 
 			ArrayList<Image> existedImages = new ArrayList<Image>(); // This list contains selected image before. DAEHOONKIM
-		
+
 			QuizAnalyzer qa = new QuizAnalyzer(ARFF_PATH);
 			if (personalizedRatio > 0.0f) {
 				qa.analyzeQuiz(solver_id);
@@ -164,9 +164,9 @@ public class QuizGen {
 
 			ArrayList<Integer> templateDistributionList = getNormalizedRatioCntofTemplateId(solver_id);
 			Set<Integer> templateDistributionSet = new HashSet<Integer>(templateDistributionList);
-			
+
 			while(curNum < numOfQuiz && failedTemplateSet.size() < SUPPORTED_TEMPLATE_NUM){		
-				
+
 				if (templateDistributionSet.size() > failedTemplateSet.size() && curNum < personalizedQuizNum)
 					isPersonalized = true;
 				else
@@ -325,10 +325,12 @@ public class QuizGen {
 					}
 				}
 				else{
-					Image image = selectedImages.get("wrong").get(wrongIdx++);
-					selections[i]=image.getUrl();		// 오답
-					if (image.getPersons().size() > 0) {
-						selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						Image image = selectedImages.get("wrong").get(wrongIdx++);
+						selections[i]=image.getUrl();		// 오답
+						if (image.getPersons().size() > 0) {
+							selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+						}
 					}
 				}
 			}
@@ -358,10 +360,12 @@ public class QuizGen {
 					}
 				}
 				else{
-					Image image = selectedImages.get("wrong").get(wrongIdx++);
-					selections[i]=image.getUrl();		// 오답
-					if (image.getPersons().size() > 0) {
-						selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						Image image = selectedImages.get("wrong").get(wrongIdx++);
+						selections[i]=image.getUrl();		// 오답
+						if (image.getPersons().size() > 0) {
+							selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+						}
 					}
 				}
 			}
