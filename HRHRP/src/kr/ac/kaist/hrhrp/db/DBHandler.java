@@ -35,10 +35,12 @@ public class DBHandler extends Init {
 	private final String INSERT_PERSON_INFO_SQL = "INSERT INTO Person (person_id, name) VALUES (?, ?)";
 	private final String INSERT_PERSON_RELATION_SQL = "INSERT INTO PersonPerson (owner_id, person_id, relationship) VALUES (?, ?, ?)";
 	private final String UPDATE_PERSON_NAME_SQL = "UPDATE Person SET name = ? WHERE person_id = ?";
-	private final String SELECT_NEW_PERSON_SQL = "SELECT Person.person_id from PersonPerson INNER JOIN Person ON PersonPerson.person_id = Person.person_id where owner_id = ? and Person.name is NULL";
+	private final String SELECT_NEW_PERSON_SQL = "SELECT Person.person_id, Person.name, PersonPerson.relationship from PersonPerson INNER JOIN Person ON PersonPerson.person_id = Person.person_id where owner_id = ? and (Person.name is NULL or PersonPerson.relationship is NULL)";
 	private final String SELECT_NEW_PERSON_RELATION_SQL = "SELECT Person.person_id FROM PersonPerson INNER JOIN Person ON PersonPerson.person_id = Person.person_id WHERE owner_id = ? and PersonPerson.relationship is NULL";
 	private final String UPDATE_PERSON_RELATION_SQL = "UPDATE PersonPerson SET relationship = ? WHERE owner_id = ? and person_id = ?";
 	
+	private final String DELETE_PHOTO_PERSON_INFO_SQL = "DELETE FROM PhotoPerson WHERE photo_id = ? and person_id = ?";
+	private final String UPDATE_PHOTO_PERSON_BY_PHOTO_SQL = "UPDATE PhotoPerson SET person_id = ? WHERE person_id = ? and photo_id = ?";
 	private final String UPDATE_PHOTO_PERSON_SQL = "UPDATE PhotoPerson SET person_id = ? WHERE person_id = ?";
 	private final String UPDATE_PERSON_PERSON_BY_ONWER_PERSON_SQL = "UPDATE PersonPerson SET person_id = ? WHERE owner_id =? and person_id = ?";
 	private final String SELECT_PERSON_PERSON_BY_PERSON_SQL = "SELECT * FROM PersonPerson WHERE person_id = ?";
@@ -47,7 +49,8 @@ public class DBHandler extends Init {
 	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id, face_id, width, height, center_x, center_y) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE url = ?";
 	
-	private final String SELECT_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE person_id = ?";
+	private final String SELECT_PHOTO_PERSON_BY_OWNER_ID_SQL = "SELECT PhotoPerson.* from PhotoPerson INNER JOIN Photo ON PhotoPerson.photo_id = Photo.url where Photo.owner_id = ? and PhotoPerson.person_id = ?  ORDER BY created_at DESC";
+	private final String SELECT_PHOTO_PERSON_BY_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE photo_id =? and person_id = ?";
 	//TODO : Select face id from photo person
 	
 	private final String SELECT_SOLVED_QUIZ_CNT_SQL = "SELECT count(*) FROM Quiz Where solver_id = ? AND solved != 0";
@@ -306,32 +309,29 @@ public class DBHandler extends Init {
 		}
 	}
 	
-	public Person selectFacesPerson(String aPersonId) {
-		Person person = null;
+	public ArrayList<Face> selectFacesByPerson(String ownerId, Person aPerson) {
+		ArrayList<Face> faces = new ArrayList<Face>();
 		PreparedStatement ps;
 		try {			
-			ps = conn.prepareStatement(SELECT_PHOTO_PERSON_SQL);
-			ps.setString(1, aPersonId);
+			ps = conn.prepareStatement(SELECT_PHOTO_PERSON_BY_OWNER_ID_SQL); //TODO ADD OWNER_ID TO WEHRE CLAUSE
+			ps.setString(1, ownerId);
+			ps.setString(2, aPerson.getPersonId());
 			ResultSet rs = ps.executeQuery();
 				
 			while(rs.next()) {
-				person = new Person();
 				String imageUrl = rs.getString("photo_id");
-				String personId = rs.getString("person_id");
 				String faceId = rs.getString("face_id");
 				double width = rs.getDouble("width");
 				double height = rs.getDouble("height");
 				double center_x = rs.getDouble("center_x");
 				double center_y = rs.getDouble("center_y");
-				
-				person.setPersonId(personId);
-				
+								
 				Face face = new Face();
 				face.setFaceId(faceId);
 				face.setImgUrl(imageUrl);
 				face.setPosition(width, height, center_x, center_y);
 				
-				person.addFace(face);
+				faces.add(face);
 			}
 			rs.close();
 			ps.close();
@@ -339,19 +339,72 @@ public class DBHandler extends Init {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return person;
+		return faces;
 	}
 	
-	public ArrayList<String> selectNewPersons(String ownerId) {
-		ArrayList<String> newPersons = new ArrayList<String>();
+	public String selectFaceIdFromPhotoPerson(String photoId, String personId) {
+		String faceId = null;
+		PreparedStatement ps;
+		try {			
+			ps = conn.prepareStatement(SELECT_PHOTO_PERSON_BY_PHOTO_PERSON_SQL);
+			ps.setString(1, photoId);
+			ps.setString(2, personId);
+			ResultSet rs = ps.executeQuery();
+				
+			while(rs.next()) {
+				faceId = rs.getString("face_id");
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return faceId;
+	}
+	
+	public boolean selectIsPersonAutoDectected(String photoId, String personId) {
+		boolean isPersonAutoDectected = true; //Safely update
+		PreparedStatement ps;
+		try {			
+			ps = conn.prepareStatement(SELECT_PHOTO_PERSON_BY_PHOTO_PERSON_SQL);
+			ps.setString(1, photoId);
+			ps.setString(2, personId);
+			ResultSet rs = ps.executeQuery();
+				
+			while(rs.next()) {
+				if (rs.getInt("is_person_auto_detected") == 1) 
+					isPersonAutoDectected = true;			
+				else
+					isPersonAutoDectected = false;	
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return isPersonAutoDectected;
+	}
+	
+	public ArrayList<Person> selectNewPersons(String ownerId) {
+		ArrayList<Person> newPersons = new ArrayList<Person>();
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(SELECT_NEW_PERSON_SQL);
 			ps.setString(1, ownerId);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()) {
-				String imageUrl = rs.getString(1);
-				newPersons.add(imageUrl);
+				String personId = rs.getString("person_id");
+				String personName = rs.getString("name");
+				String personRelation = rs.getString("relationship");
+				
+				Person person = new Person();
+				person.setPersonId(personId);
+				person.setPersonName(personName);
+				person.setPersonRelation(personRelation);
+				
+				newPersons.add(person);
 			}
 			rs.close();
 			ps.close();
@@ -389,6 +442,21 @@ public class DBHandler extends Init {
 			ps.setString(1, relation);
 			ps.setString(2, ownerId);
 			ps.setString(3, personId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void updatePhotoPersonByPhoto(String photoId, String newId, String existedId) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(UPDATE_PHOTO_PERSON_BY_PHOTO_SQL);
+			ps.setString(1, newId);
+			ps.setString(2, existedId);
+			ps.setString(3, photoId);
 			ps.executeUpdate();
 			ps.close();
 		} catch (Exception e) {
@@ -458,6 +526,20 @@ public class DBHandler extends Init {
 		try {
 			ps = conn.prepareStatement(DELETE_PERSON_INFO_SQL);
 			ps.setString(1, deletedId);
+			ps.executeUpdate();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void deletePhotoPerson(String photoId, String personId) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(DELETE_PHOTO_PERSON_INFO_SQL);
+			ps.setString(1, photoId);
+			ps.setString(2, personId);
 			ps.executeUpdate();
 			ps.close();
 		} catch (Exception e) {
@@ -582,7 +664,7 @@ public class DBHandler extends Init {
 				Date takenAt = rs.getTimestamp("taken_at");
 				String weather = rs.getString("weather");
 				
-				Image image = new Image(url, ownerId, groupName);
+				Image image = new Image(url, ownerId, GROUP_NAME);
 				image.setAddress(city, district, street);
 				image.setImageTime(takenAt);
 				image.setWeather(weather);
@@ -653,7 +735,7 @@ public class DBHandler extends Init {
 				Date takenAt = rs.getTimestamp("taken_at");
 				String weather = rs.getString("weather");
 				
-				Image image = new Image(url, ownerId, groupName);
+				Image image = new Image(url, ownerId, GROUP_NAME);
 				image.setAddress(city, district, street);
 				image.setImageTime(takenAt);
 				image.setWeather(weather);
