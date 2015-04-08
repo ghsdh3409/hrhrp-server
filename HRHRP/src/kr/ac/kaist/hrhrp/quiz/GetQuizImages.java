@@ -240,11 +240,13 @@ public class GetQuizImages {
 		String imageRelation = image.getPersons().get(0).getPersonRelation();
 		String existedPersonId = existedImage.getPersons().get(0).getPersonId();
 		String existedRelation = existedImage.getPersons().get(0).getPersonRelation();	
-		if(existedPersonId.equals(imagePersonId) || existedRelation.equals(imageRelation)) {
+		if (existedPersonId != null && existedPersonId.equals(imagePersonId)) {
 			return true;
-		} else {
-			return false;
 		}
+		if (existedRelation != null && existedRelation.equals(imageRelation)) {
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean isImageContain(ArrayList<Image> imageList, Image image) {
@@ -253,7 +255,10 @@ public class GetQuizImages {
 		for (Image existedImage : imageList) {
 			String existedPersonId = existedImage.getPersons().get(0).getPersonId();
 			String existedRelation = existedImage.getPersons().get(0).getPersonRelation();	
-			if(existedPersonId.equals(imagePersonId) || existedRelation.equals(imageRelation)) {
+			if (existedPersonId != null && existedPersonId.equals(imagePersonId)) {
+				return true;
+			}
+			if (existedRelation != null && existedRelation.equals(imageRelation)) {
 				return true;
 			}
 		}
