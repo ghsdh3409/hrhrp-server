@@ -47,7 +47,7 @@ public class DBHandler extends Init {
 	private final String SELECT_PERSON_PERSON_BY_PERSON_SQL = "SELECT * FROM PersonPerson WHERE person_id = ?";
 	private final String SELECT_PERSON_PERSON_BY_OWNER_PERSON_SQL = "SELECT * FROM PersonPerson WHERE owner_id=? and person_id = ?";
 	private final String DELETE_PERSON_PERSON_BY_OWNER_PERSON_SQL = "DELETE FROM PersonPerson WHERE owner_id = ? and person_id = ?";
-	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id, face_id, width, height, center_x, center_y) VALUES (?, ?, ?, ?, ?, ?, ?)";
+	private final String INSERT_IMAGE_PERSON_SQL = "INSERT INTO PhotoPerson (photo_id, person_id, face_id, width, height, center_x, center_y, is_person_auto_detected) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 	private final String UPDATE_EXTERNAL_INFO_SQL = "UPDATE Photo SET weather = ?, address = ?, venue = ? WHERE url = ?";
 
 	private final String SELECT_PHOTO_PERSON_BY_OWNER_ID_SQL = "SELECT PhotoPerson.* from PhotoPerson INNER JOIN Photo ON PhotoPerson.photo_id = Photo.url where Photo.owner_id = ? and PhotoPerson.person_id = ?  ORDER BY created_at DESC";
@@ -631,7 +631,7 @@ public class DBHandler extends Init {
 		}
 	}
 
-	public void insertImagePerson(String imageId, String personId, String faceId, double width, double height, double center_x, double center_y) {
+	public void insertImagePerson(String imageId, String personId, String faceId, double width, double height, double center_x, double center_y, int isPersonAutoDetected) {
 		PreparedStatement ps;
 		try {
 			ps = conn.prepareStatement(INSERT_IMAGE_PERSON_SQL);
@@ -643,6 +643,7 @@ public class DBHandler extends Init {
 			ps.setDouble(5, height);
 			ps.setDouble(6, center_x);
 			ps.setDouble(7, center_y);
+			ps.setInt(8, isPersonAutoDetected);
 
 			ps.executeUpdate();
 			ps.close();

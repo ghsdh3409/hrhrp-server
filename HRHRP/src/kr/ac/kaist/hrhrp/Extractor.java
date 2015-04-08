@@ -48,8 +48,15 @@ public class Extractor extends Init {
 			System.out.println(person.getPersonName() + "\t" + person.getPersonId());
 			dbTemplate.insertPersonInfo(person.getPersonId(), person.getPersonName());
 			dbTemplate.insertPersonRelation(image.getImageOwnerId(), person.getPersonId(), null);
+			
+			int isAutoDetected = 0;
+			if (person.getIsAutoDetected() != null && person.getIsAutoDetected()) {
+				isAutoDetected = 1;
+			} else {
+				isAutoDetected = 0;
+			}
 			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId(), face.getFaceId(), face.getPosition().getWidth(),
-					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
+					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY(), isAutoDetected);
 		}
 
 		updateAddress(image);
