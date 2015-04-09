@@ -330,6 +330,11 @@ public class GetQuizImages {
 				Date takenAt = image.getImageTime();
 				SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				String time = transFormat.format(takenAt);
+				int colorH = image.getColorH();
+				int colorS = image.getColorS();
+				int colorV = image.getColorV();
+								
+				String objectClassCode = image.getObjectId();
 
 				HashMap<String,String> photo=new HashMap<String,String>();
 
@@ -337,8 +342,13 @@ public class GetQuizImages {
 				photo.put("weather", weather);
 				photo.put("time", time);
 				photo.put("location", location);
+				photo.put("color_h", ""+colorH);
+				photo.put("color_s", ""+colorS);
+				photo.put("color_v", ""+colorV);
+				photo.put("object",objectClassCode);
+				
 
-				System.out.print(personId + '\t' + weather + '\t' + time + '\t' + location);
+				System.out.print(photo);
 
 				float score = 0.0f;
 				try {

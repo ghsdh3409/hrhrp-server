@@ -3,11 +3,9 @@ package kr.ac.kaist.hrhrp.quiz;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 import kr.ac.kaist.hrhrp.type.Image;
@@ -156,10 +154,9 @@ public class QuizGen {
 
 			QuizAnalyzer qa = new QuizAnalyzer(ARFF_PATH);
 			if (personalizedRatio > 0.0f) {
-				qa.analyzeQuiz(solver_id);
+				qa.analyzeQuiz(solver_id,true);
 			} else {
-				System.out.print("UPDATE_QUIZ_FEATURE");
-				qa.updateQuizFeature(solver_id);
+				qa.analyzeQuiz(solver_id, false);
 			}
 
 			ArrayList<Integer> templateDistributionList = getNormalizedRatioCntofTemplateId(solver_id);

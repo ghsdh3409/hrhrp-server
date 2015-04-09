@@ -18,6 +18,12 @@ public class Image {
 	private String imageOwnerId;
 	private String groupName;
 	private String path;
+	
+	private int colorH;
+	private int colorS;
+	private int colorV;
+	
+	private String objectId;
 
 	public Image(String aUrl, String aImageownerId, String aGroupName) {
 		url = aUrl;
@@ -72,6 +78,22 @@ public class Image {
 		groupName = aGroupName;
 	}
 	
+	public void setColorH(int aColorH) {
+		colorH = aColorH;
+	}
+	
+	public void setColorS(int aColorS) {
+		colorS = aColorS;
+	}
+	
+	public void setColorV(int aColorV) {
+		colorV = aColorV;
+	}
+	
+	public void setObjectId(String aObjectId) {
+		objectId = aObjectId;
+	}
+	
 	public String getPath() {
 		return path;
 	}
@@ -106,6 +128,22 @@ public class Image {
 	
 	public ArrayList<Person> getPersons() {
 		return persons;
+	}
+	
+	public int getColorH() {
+		return colorH;
+	}
+	
+	public int getColorS() {
+		return colorS;
+	}
+	
+	public int getColorV() {
+		return colorV;
+	}
+	
+	public String getObjectId() {
+		return objectId;
 	}
 	
 	public String getUrl() {

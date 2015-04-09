@@ -18,24 +18,29 @@ public class JDBC {
 	private final String getPhotoCntByUsernameSQL = "SELECT count(*) FROM Photo WHERE owner_id=?"; //ADDED BY DAEHOONKIM for verifying if existing photo
 	private final String getTemplateSQL="SELECT template FROM Template WHERE template_id=?";
 	private final String addQuizToDBSQL="INSERT INTO Quiz (template_id, solver_id, quiz_text, quiz_image, selection_type, selection1, selection2, selection3, selection4, answer, solved, quiz_face, selection1_face, selection2_face, selection3_face, selection4_face) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-	private final String addQuizFeatureToDBSQL="INSERT INTO QuizFeature (quiz_id, template_id, solver_id, level, person, weather, time, location, correct) VALUES (?,?,?,?,?,?,?,?,?)";
+	private final String addQuizFeatureToDBSQL="INSERT INTO QuizFeature (quiz_id, template_id, solver_id, level, person, weather, time, location, color_h, color_s, color_v, object, correct) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 	private final String getRelationSQL="SELECT relationship FROM PersonPerson WHERE owner_id=? AND person_id=?";
 	private final String getParentFeatureSQL="SELECT parent FROM Tree WHERE feature=? and level=? and type=?";
 	private final String getQuizOfUser="SELECT * FROM Quiz WHERE solver_id=? and solved != 0";
 	private final String getPersonInPhotoSQL="SELECT person_id FROM PhotoPerson WHERE photo_id=? and face_id=?";
-	private final String getPhotoInfoSQL="SELECT taken_at,weather,city,district,street FROM Photo WHERE url=?";
+	private final String getPhotoInfoSQL="SELECT * FROM Photo WHERE url=?";
 	
 	private final String getDistinctPersonFeatureSQL="SELECT distinct(person) FROM QuizFeature WHERE solver_id=? and level=?";
 	private final String getDistinctWeatherFeatureSQL="SELECT distinct(weather) FROM QuizFeature WHERE solver_id=? and level=?";
 	private final String getDistinctTimeFeatureSQL="SELECT distinct(time) FROM QuizFeature WHERE solver_id=? and level=?";
 	private final String getDistinctLocationFeatureSQL="SELECT distinct(location) FROM QuizFeature WHERE solver_id=? and level=?";
+	private final String getDistinctColorHFeatureSQL="SELECT distinct(color_h) FROM QuizFeature WHERE solver_id=? and level=?";
+	private final String getDistinctColorSFeatureSQL="SELECT distinct(color_s) FROM QuizFeature WHERE solver_id=? and level=?";
+	private final String getDistinctColorVFeatureSQL="SELECT distinct(color_v) FROM QuizFeature WHERE solver_id=? and level=?";
+	private final String getDistinctObjectFeatureSQL="SELECT distinct(object) FROM QuizFeature WHERE solver_id=? and level=?";
 	
-	private final String getFeaturesForLevelSQL="SELECT person, weather, time, location FROM QuizFeature WHERE solver_id=? and level=?";
+	private final String getFeaturesForLevelSQL="SELECT * FROM QuizFeature WHERE solver_id=? and level=?";
 	
-	private final String getNumberOfPatternSQL="SELECT count(*) as cnt FROM QuizFeature WHERE solver_id=? and person=? and weather=? and time=? and location=?";
-	private final String getWrongNumberOfPatternSQL="SELECT count(*) as cnt FROM QuizFeature WHERE solver_id=? and person=? and weather=? and time=? and location=? and correct=0";
+	private final String getNumberOfPatternSQL="SELECT count(*) as cnt FROM QuizFeature WHERE solver_id=? and person=? and weather=? and time=? and location=? and color_h=? and color_s=? and color_v=? and object=?";
+	private final String getWrongNumberOfPatternSQL="SELECT count(*) as cnt FROM QuizFeature WHERE solver_id=? and person=? and weather=? and time=? and location=? and color_h=? and color_s=? and color_v=? and object=? and correct=0";
 	
 	private final String getCorrectInfoSQL="SELECT correct FROM QuizFeature WHERE solver_id=? and template_id=?";
+	private final String getClassCodeSQL="SELECT class_code FROM Object WHERE code=?";
 	
 	public JDBC(){
 		try {
@@ -65,6 +70,10 @@ public class JDBC {
 		String weather=quiz.get("weather");
 		String time=quiz.get("time");
 		String location=quiz.get("location");
+		String color_h=quiz.get("color_h");
+		String color_s=quiz.get("color_s");
+		String color_v=quiz.get("color_v");
+		String object=quiz.get("object");
 		
 		pstmt=conn.prepareStatement(getNumberOfPatternSQL);
 		pstmt.setString(1, solver_id);
@@ -72,6 +81,10 @@ public class JDBC {
 		pstmt.setString(3, weather);
 		pstmt.setString(4, time);
 		pstmt.setString(5, location);
+		pstmt.setString(6, color_h);
+		pstmt.setString(7, color_s);
+		pstmt.setString(8, color_v);
+		pstmt.setString(9, object);
 		rs=pstmt.executeQuery();
 		while(rs.next()){
 			cnt=rs.getInt("cnt");
@@ -85,6 +98,10 @@ public class JDBC {
 		String weather=quiz.get("weather");
 		String time=quiz.get("time");
 		String location=quiz.get("location");
+		String color_h=quiz.get("color_h");
+		String color_s=quiz.get("color_s");
+		String color_v=quiz.get("color_v");
+		String object=quiz.get("object");
 		
 		pstmt=conn.prepareStatement(getWrongNumberOfPatternSQL);
 		pstmt.setString(1, solver_id);
@@ -92,6 +109,11 @@ public class JDBC {
 		pstmt.setString(3, weather);
 		pstmt.setString(4, time);
 		pstmt.setString(5, location);
+		pstmt.setString(6, color_h);
+		pstmt.setString(7, color_s);
+		pstmt.setString(8, color_v);
+		pstmt.setString(9, object);
+		
 		rs=pstmt.executeQuery();
 		while(rs.next()){
 			cnt=rs.getInt("cnt");
@@ -105,14 +127,41 @@ public class JDBC {
 		pstmt=conn.prepareStatement(getPhotoInfoSQL);
 		pstmt.setString(1, photo_id);
 		rs=pstmt.executeQuery();
+		int object;
 		while(rs.next()){
 			info.put("date",rs.getString("taken_at"));
 			info.put("weather", rs.getString("weather"));
 			info.put("street", rs.getString("street"));
+			info.put("color_h", ""+rs.getInt("color_H"));
+			info.put("color_s", ""+rs.getInt("color_S"));
+			info.put("color_v", ""+rs.getInt("color_V"));
+			object=rs.getInt("object_id");
+			if(object==0){
+				info.put("object", "Null");
+			} else{
+				String classCode=getObjectCode(object);
+				if(classCode!=null){
+					info.put("object", classCode);
+				} else{
+					info.put("object", "Null");
+				}
+			}
 		}
 		return info;
 	}
+	
+	public String getObjectCode(int code) throws Exception{
+		String classCode="";
+		pstmt=conn.prepareStatement(this.getClassCodeSQL);
+		pstmt.setInt(1, code);
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			classCode=rs.getString("class_code");
+		}
+		return classCode;
 		
+	}
+	
 	// Ư�� level�� distinct�� �����
 	public ArrayList<String> getDistinctPersonFeatures(String solver_id, int level) throws Exception{
 		ArrayList<String> features=new ArrayList<String>();
@@ -164,7 +213,59 @@ public class JDBC {
 		}
 		return features;
 	}
+	
+	// 특정 level에 distinct한 color h들
+	public ArrayList<String> getDistinctColorHFeatures(String solver_id, int level) throws Exception{
+		ArrayList<String> features=new ArrayList<String>();
+		pstmt=conn.prepareStatement(this.getDistinctColorHFeatureSQL);
+		pstmt.setString(1, solver_id);
+		pstmt.setInt(2, level);
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			features.add(rs.getString("color_h"));
+		}
+		return features;
+	}
 		
+	// 특정 level에 distinct한 color s들
+	public ArrayList<String> getDistinctColorSFeatures(String solver_id, int level) throws Exception{
+		ArrayList<String> features=new ArrayList<String>();
+		pstmt=conn.prepareStatement(this.getDistinctColorSFeatureSQL);
+		pstmt.setString(1, solver_id);
+		pstmt.setInt(2, level);
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			features.add(rs.getString("color_s"));
+		}
+		return features;
+	}
+	
+	// 특정 level에 distinct한 color v들
+	public ArrayList<String> getDistinctColorVFeatures(String solver_id, int level) throws Exception{
+		ArrayList<String> features=new ArrayList<String>();
+		pstmt=conn.prepareStatement(this.getDistinctColorVFeatureSQL);
+		pstmt.setString(1, solver_id);
+		pstmt.setInt(2, level);
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			features.add(rs.getString("color_v"));
+		}
+		return features;
+	}
+	
+	// 특정 level에 distinct한 object들
+	public ArrayList<String> getDistinctObjectFeatures(String solver_id, int level) throws Exception{
+		ArrayList<String> features=new ArrayList<String>();
+		pstmt=conn.prepareStatement(this.getDistinctObjectFeatureSQL);
+		pstmt.setString(1, solver_id);
+		pstmt.setInt(2, level);
+		rs=pstmt.executeQuery();
+		while(rs.next()){
+			features.add(rs.getString("object"));
+		}
+		return features;
+	}
+	
 	// Ư�� level�� arff ������ ä�� �����͵�
 	public ArrayList<HashMap<String,String>> getFeaturesForLevel(String solver_id, int level) throws Exception{
 		ArrayList<HashMap<String,String>> featureList=new ArrayList<HashMap<String,String>>();
@@ -178,13 +279,17 @@ public class JDBC {
 			featureMap.put("weather", rs.getString("weather"));
 			featureMap.put("time", rs.getString("time"));
 			featureMap.put("location", rs.getString("location"));
+			featureMap.put("color_h", rs.getString("color_h"));
+			featureMap.put("color_s", rs.getString("color_s"));
+			featureMap.put("color_v", rs.getString("color_v"));
+			featureMap.put("object", rs.getString("object"));
 			featureList.add(featureMap);
 		}
 		return featureList;
 	}
 	
 	public String getPersonInPhoto(String photo_id, String face_id) throws Exception{
-		String person_id="";
+		String person_id=null;
 		pstmt=conn.prepareStatement(getPersonInPhotoSQL);
 		pstmt.setString(1, photo_id);
 		pstmt.setString(2, face_id);
@@ -275,7 +380,7 @@ public class JDBC {
 		pstmt.executeUpdate();
 	}
 	
-	public void insertQuizFeature(int quiz_id, int template_id, String solver_id, int level, String person, String weather, String time, String location, int correct) throws SQLException{
+	public void insertQuizFeature(int quiz_id, int template_id, String solver_id, int level, String person, String weather, String time, String location, String h, String s, String v, String object, int correct) throws SQLException{
 		pstmt=conn.prepareStatement(addQuizFeatureToDBSQL);
 		pstmt.setInt(1, quiz_id);
 		pstmt.setInt(2, template_id);
@@ -285,7 +390,11 @@ public class JDBC {
 		pstmt.setString(6, weather);
 		pstmt.setString(7, time);
 		pstmt.setString(8, location);
-		pstmt.setInt(9, correct);
+		pstmt.setString(9, h);
+		pstmt.setString(10, s);
+		pstmt.setString(11, v);
+		pstmt.setString(12, object);
+		pstmt.setInt(13, correct);
 		pstmt.executeUpdate();
 	}
 	

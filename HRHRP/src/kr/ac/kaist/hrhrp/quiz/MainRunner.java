@@ -39,7 +39,7 @@ public class MainRunner {
 		////////////////
 		
 		
-		qa.analyzeQuiz("ghsdh3409@gmail.com");
+		qa.analyzeQuiz("ghsdh3409@gmail.com",true);
 		HashMap<Integer, ArrayList<HashMap<String,String>>> itemsets=ruleMiner.startMining("ghsdh3409@gmail.com");
 		psc.setFreqItemsets(itemsets);
 		float score=psc.calculateScore("ghsdh3409@gmail.com", photo);

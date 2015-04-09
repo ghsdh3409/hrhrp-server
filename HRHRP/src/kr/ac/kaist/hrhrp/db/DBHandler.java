@@ -60,79 +60,80 @@ public class DBHandler extends Init {
 	private final String SELECT_FACE_SQL = "SELECT PhotoPerson.* FROM PhotoPerson Where face_id = ?";
 	private final String UPDATE_QUIZ_SOLVED_SQL = "UPDATE Quiz SET solved = ? WHERE quiz_id = ?";
 
-	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and Person.name is not null";
 
-	private final String SELECT_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and PersonPerson.relationship is not null";
 
-	private final String SELECT_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and Person.name is not null";
 
-	private final String SELECT_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and PersonPerson.relationship is not null";
 
-	private final String SELECT_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) = DATE_ADD(CURDATE(), INTERVAL -1 DAY)";
 
-	private final String SELECT_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Photo.owner_id = ? and DATE(Photo.taken_at) != DATE_ADD(CURDATE(), INTERVAL -1 DAY)";
 
-	private final String SELECT_ALL_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_ALL_PHOTO_BY_T1 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Person.name is not null LIMIT 100";
 
-	private final String SELECT_ALL_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_ALL_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE PersonPerson.relationship is not null LIMIT 100";
 
-	private final String SELECT_ALL_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_ALL_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE Person.name is not null LIMIT 100";
 
-	private final String SELECT_ALL_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_ALL_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE PersonPerson.relationship is not null LIMIT 100";
 
-	private final String SELECT_ALL_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_ALL_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE DATE(Photo.taken_at) = DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 100";
 
-	private final String SELECT_ALL_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship FROM Photo "
+	private final String SELECT_ALL_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
 			+ "WHERE DATE(Photo.taken_at) != DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 100";
 
-
+	private final String getClassCodeSQL="SELECT class_code FROM Object WHERE code=?";
+	
 	public DBHandler() {
 		init();
 	}
@@ -691,6 +692,19 @@ public class DBHandler extends Init {
 		}
 	}
 
+	public String getObjectCode(int code) throws Exception{
+		PreparedStatement ps = null;
+		String classCode="";
+		ps = conn.prepareStatement(this.getClassCodeSQL);
+		ps.setInt(1, code);
+		ResultSet rs=ps.executeQuery();
+		while(rs.next()){
+			classCode=rs.getString("class_code");
+		}
+		return classCode;
+		
+	}
+	
 	public ArrayList<Image> selectAllImagesByTemplateId(int templateType) {
 		PreparedStatement ps = null;
 		ArrayList<Image> images = new ArrayList<Image>();
@@ -717,11 +731,26 @@ public class DBHandler extends Init {
 				String street = rs.getString("street");
 				Date takenAt = rs.getTimestamp("taken_at");
 				String weather = rs.getString("weather");
-
+				int colorH = rs.getInt("color_H");
+				int colorS = rs.getInt("color_S");
+				int colorV = rs.getInt("color_V");
+				int objectId = rs.getInt("object_id");
+				String objectClassCode=null; 
+				
 				Image image = new Image(url, ownerId, GROUP_NAME);
 				image.setAddress(city, district, street);
 				image.setImageTime(takenAt);
 				image.setWeather(weather);
+				image.setColorH(colorH);
+				image.setColorS(colorS);
+				image.setColorV(colorV);
+				
+				if (objectId == 0) {
+					objectClassCode="Null";
+				} else {
+					objectClassCode=getObjectCode(objectId);
+				}
+				image.setObjectId(objectClassCode);
 
 				String personId = rs.getString("person_id");
 				String name = rs.getString("name");
@@ -788,12 +817,27 @@ public class DBHandler extends Init {
 				String street = rs.getString("street");
 				Date takenAt = rs.getTimestamp("taken_at");
 				String weather = rs.getString("weather");
-
+				int colorH = rs.getInt("color_H");
+				int colorS = rs.getInt("color_S");
+				int colorV = rs.getInt("color_V");
+				int objectId = rs.getInt("object_id");
+				String objectClassCode=null; 
+				
 				Image image = new Image(url, ownerId, GROUP_NAME);
 				image.setAddress(city, district, street);
 				image.setImageTime(takenAt);
 				image.setWeather(weather);
-
+				image.setColorH(colorH);
+				image.setColorS(colorS);
+				image.setColorV(colorV);
+				
+				if (objectId == 0) {
+					objectClassCode="Null";
+				} else {
+					objectClassCode=getObjectCode(objectId);
+				}
+				image.setObjectId(objectClassCode);
+				
 				String personId = rs.getString("person_id");
 				String name = rs.getString("name");
 				String relationship = rs.getString("relationship");

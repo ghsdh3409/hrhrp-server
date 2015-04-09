@@ -13,7 +13,7 @@ import weka.core.Instances;
 public class MultilevelAssociationMiner {
 	private JDBC jdbc;
 	private final int treedepth=3;
-	private final int numOfFeatures=4;
+	private final int numOfFeatures=8;
 	private String user_id;
 	private HashMap<Integer,ArrayList<HashMap<String,String>>> freqItemsets;
 	
@@ -132,7 +132,11 @@ public class MultilevelAssociationMiner {
 			tempMap.put("weather", tokens[1].split("=")[1]);
 			tempMap.put("time", tokens[2].split("=")[1]);
 			tempMap.put("location", tokens[3].split("=")[1]);
-			tempMap.put("support", tokens[4]);
+			tempMap.put("color_h", tokens[4].split("=")[1]);
+			tempMap.put("color_s", tokens[5].split("=")[1]);
+			tempMap.put("color_v", tokens[6].split("=")[1]);
+			tempMap.put("object", tokens[7].split("=")[1]);
+			tempMap.put("support", tokens[8]);
 			analItemsets.add(tempMap);
 		}
 		return analItemsets;
