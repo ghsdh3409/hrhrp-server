@@ -80,7 +80,7 @@ public class PhotoFilter {
 				if(other>-1){
 					file2=new File(srcFolderName+"/"+files[other].getName());
 					sim=this.getCosSimilarity(file1, file2);
-					if (sim>0.8){
+					if (sim>0.7){
 						survived=false;
 						break;
 					}
