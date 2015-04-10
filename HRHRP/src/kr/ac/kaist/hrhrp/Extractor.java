@@ -48,7 +48,7 @@ public class Extractor extends Init {
 			System.out.println(person.getPersonName() + "\t" + person.getPersonId());
 			dbTemplate.insertPersonInfo(person.getPersonId(), person.getPersonName());
 			dbTemplate.insertPersonRelation(image.getImageOwnerId(), person.getPersonId(), null);
-			
+
 			int isAutoDetected = 0;
 			if (person.getIsAutoDetected() != null && person.getIsAutoDetected()) {
 				isAutoDetected = 1;
@@ -126,6 +126,15 @@ public class Extractor extends Init {
 		return newPersons;
 	}
 
+	public void updateUnknownPerson(String photoId, String personId) {
+		try {
+			System.out.println("UPDATE PERSON :: REMOVE UNKNOWN PERSON PHOTO");
+			dbTemplate.deletePhotoPerson(photoId, personId);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void updateNewPersonRelation(String photoId, String ownerId, String personId, String personName, String relation, String faceId) {
 		try {
 			boolean isAutoDetectedPerson = dbTemplate.selectIsPersonAutoDectected(photoId, personId);
@@ -142,7 +151,7 @@ public class Extractor extends Init {
 					dbTemplate.insertPersonRelationWithUpdate(ownerId, correctPersonId, relation);
 					dbTemplate.updatePhotoPersonByPhoto(photoId, correctPersonId, personId);
 				} else { //When the error is occured, the new user information is deleted.
-					System.out.println("UPDATE PERSON :: REMOVE INVALID NEW PERSON");
+					System.out.println("UPDATE PERSON :: REMOVE INVALID NEW PERSON PHOTO");
 					dbTemplate.deletePhotoPerson(photoId, personId);
 				}
 			} else {
