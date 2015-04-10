@@ -17,7 +17,7 @@ import java.util.LinkedList;
 public class HSV_Extractor {
 
 	static {
-		System.load("/usr/local/share/OpenCV/java/libopencv_java249.so"); //opencv_java249
+		System.loadLibrary("opencv_java249"); //opencv_java249
 	}
 
 	//Constants
@@ -52,6 +52,86 @@ public class HSV_Extractor {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public String[] getMostFrequentHSV() {
+		String hsvKey = null;
+		Mat hsv = new Mat();
+		hsv = m;
+		Imgproc.cvtColor(m, hsv, Imgproc.COLOR_BGR2HSV);
+		int col = (int) hsv.size().width;
+		int row = (int) hsv.size().height;
+		int colSampleRate = (int) (col * 0.01);
+		int rowSampleRate = (int) (row * 0.01);
+		//double h_sum = 0.0;
+		//double s_sum = 0.0;
+		//double v_sum = 0.0;
+		
+		double h_max = 0.0;
+		double s_max = 0.0;
+		double v_max = 0.0;
+		
+		//System.out.println(rowSampleRate + "\t" + colSampleRate);
+		
+		HashMap<String, Integer> hsvValueFreq = new HashMap<String, Integer>();
+		for (int i=0; i<row; i=i+3) {
+			for (int j=0; j<col; j=j+3) {
+				double h = (hsv.get(i, j)[0] / 180) * 360;
+				double s = (hsv.get(i, j)[1] / 255) * 100;
+				double v = (hsv.get(i, j)[2] / 255) * 100;
+				
+				hsvKey = (int)h+"/"+(int)s+"/"+(int)v;
+				
+				if (!hsvValueFreq.containsKey(hsvKey)) {
+					hsvValueFreq.put(hsvKey, 0); 
+				}
+				hsvValueFreq.put(hsvKey, hsvValueFreq.get(hsvKey) + 1);
+				
+				//h_sum += h;
+				//s_sum += s;
+				//v_sum += v;
+				
+				if (h_max < h) {
+					h_max = h;
+				}
+				
+				if (s_max < s) {
+					s_max = s;
+				}
+				
+				if (v_max < v) {
+					v_max = v;
+				}
+				
+			}
+		}
+		
+		int maxHSV = 0;
+		String maxHSVValue = null;
+		for (String key : hsvValueFreq.keySet()) {
+			int hsvFreq = hsvValueFreq.get(key);
+			if (maxHSV < hsvFreq) {
+				maxHSV = hsvFreq;
+				maxHSVValue = key;
+			}
+		}
+		
+		System.out.println(maxHSV + " " + maxHSVValue);
+		
+		String[] hsvSplit = maxHSVValue.split("/");
+		String[] resultHSV = new String[3];
+		resultHSV[0] = "h;" + hsvSplit[0];
+		resultHSV[1] = "s;" + hsvSplit[1];
+		resultHSV[2] = "v;" + hsvSplit[2];
+		
+		//double h_avg = h_sum / (row*col);
+		//double s_avg = s_sum / (row*col);
+		//double v_avg = v_sum / (row*col);
+		
+		//System.out.println(col + "\t" + row + "\t" + m.get(0, 0)[0] + "\t" + m.get(0, 0)[1] + "\t" + m.get(0, 0)[2]);
+		//System.out.println(h_avg + "\t" + s_avg + "\t" + v_avg);
+		//System.out.println(h_max + "\t" + s_max + "\t" + v_max);
+		return resultHSV;
 	}
 	
 	//get svalue
@@ -199,10 +279,10 @@ public class HSV_Extractor {
 	}
 	
 	
-	private int getMostFrequentNumber(ArrayList<Integer> list) {
+	private int getMostFrequentNumber(ArrayList<Double> list) {
 		HashMap<Integer, Integer> freq = new HashMap<Integer, Integer> ();
 		for (int i=0; i<list.size(); i++) {
-			int number = list.get(i);
+			int number = list.get(i).intValue();
 			if (!freq.containsKey(number))
 				freq.put(number, 0);
 			freq.put(number, freq.get(number)+1);
@@ -230,20 +310,39 @@ public class HSV_Extractor {
 			sv_table[i] = 0;
 		}
 	
-		ArrayList<Integer> valueList = new ArrayList<Integer>();
+		ArrayList<Double> valueList = new ArrayList<Double>();
 		
 		for(i = 0; i < hmax2; i++){
 			x = i * w_bin;
 			double[] t = v_hist.get(i,0);
 			tmp = Integer.valueOf((int) Math.round(t[0]));
 			
-			valueList.add(tmp);
+			for (int j=0; j<tmp; j++) {
+				valueList.add((i / 255.0)*100);		
+			}	
 		}
 
 		int mostFrequentValue = getMostFrequentNumber(valueList);
 		
+		//int mostFrequentValue = (int) average(valueList);
+		
 		stb.append(sv + ";" + mostFrequentValue);
 
+	}
+	
+	public static double average(ArrayList<Double> list) {
+		System.out.println(list.size());
+	    // 'average' is undefined if there are no elements in the list.
+	    if (list == null || list.isEmpty())
+	        return 0.0;
+	    // Calculate the summation of the elements in the list
+	    long sum = 0;
+	    int n = list.size();
+	    // Iterating manually is faster than using an enhanced for loop.
+	    for (int i = 0; i < n; i++)
+	        sum += list.get(i);
+	    // We don't want to perform an integer division, so the cast is mandatory.
+	    return ((double) sum) / n;
 	}
 	
 	private void approximateH(Mat hist, int histSize, BufferedWriter out, StringBuffer stb ) throws IOException{
@@ -255,7 +354,7 @@ public class HSV_Extractor {
 			color_table[i] = 0;
 		}
 		
-		ArrayList<Integer> valueList = new ArrayList<Integer>();
+		ArrayList<Double> valueList = new ArrayList<Double>();
 		
 		for(i = 0; i < histSize; i++){
 			x = i * w_bin;
@@ -263,10 +362,12 @@ public class HSV_Extractor {
 			
 			tmp = Integer.valueOf((int) Math.round(t[0]));
 			
-			valueList.add(tmp);		
+			for (int j=0; j<tmp; j++) {
+				valueList.add(i * 2.0);		
+			}	
 		}  	
 		int mostFrequentValue = getMostFrequentNumber(valueList);
-		
+		//int mostFrequentValue = (int) average(valueList);
 		stb.append("h" + ";" + mostFrequentValue);
 	}
 }
