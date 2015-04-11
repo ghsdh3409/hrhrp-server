@@ -17,7 +17,9 @@ import java.util.LinkedList;
 public class HSV_Extractor {
 
 	static {
-		System.loadLibrary("opencv_java249"); //opencv_java249
+		//System.loadLibrary("opencv_java249"); //opencv_java249
+        System.load("/usr/local/share/OpenCV/java/libopencv_java249.so"); //opencv_java249
+
 	}
 
 	//Constants
