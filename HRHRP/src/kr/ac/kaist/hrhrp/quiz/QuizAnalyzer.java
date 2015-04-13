@@ -134,6 +134,10 @@ public class QuizAnalyzer {
 	String getWeather(String weather){
 		String cloud=weather.split("/")[1];
 		String rain=weather.split("/")[2];
+		
+		if (cloud.equals("맑음")) {
+			return cloud;
+		}
 		return cloud+"+"+rain;
 	}
 	
