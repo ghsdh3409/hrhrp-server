@@ -4,9 +4,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import kr.ac.kaist.hrhrp.type.Face;
 import kr.ac.kaist.hrhrp.type.Image;
@@ -54,6 +56,39 @@ public class DBHandler extends Init {
 	private final String SELECT_PHOTO_PERSON_BY_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE photo_id =? and person_id = ?";
 	//TODO : Select face id from photo person
 
+	private final String SELECT_SOLVED_QUIZ_SQL = "SELECT Quiz.*," +
+			" P5.person_id as 'quiz_person'," +
+			" P1.person_id as 'selection1_person'," +
+			" P2.person_id as 'selection2_person'," +
+			" P3.person_id as 'selection3_person'," +
+			" P4.person_id as 'selection4_person'," +
+			" PE5.name as 'quiz_name'," +
+			" PE1.name as 'selection1_name'," +
+			" PE2.name as 'selection2_name'," +
+			" PE3.name as 'selection3_name'," +
+			" PE4.name as 'selection4_name'," +
+			" Ph1.color_H as 'quiz_person_color_h', Ph1.color_S as 'quiz_person_color_s', Ph1.color_V as 'quiz_person_color_v'," +
+			" Ph2.color_H as 'selection1_color_h', Ph2.color_S as 'selection1_color_s', Ph2.color_V as 'selection1_color_v'," +
+			" Ph3.color_H as 'selection2_color_h', Ph3.color_S as 'selection2_color_s', Ph3.color_V as 'selection2_color_v'," +
+			" Ph4.color_H as 'selection3_color_h', Ph4.color_S as 'selection3_color_s', Ph4.color_V as 'selection3_color_v'," +
+			" Ph5.color_H as 'selection4_color_h', Ph5.color_S as 'selection4_color_s', Ph5.color_V as 'selection4_color_v'" +
+			" FROM Quiz" +
+			" LEFT OUTER JOIN PhotoPerson P1 ON selection1_face = P1.face_id" +
+			" LEFT OUTER JOIN PhotoPerson P2 ON selection2_face = P2.face_id" +
+			" LEFT OUTER JOIN PhotoPerson P3 ON selection3_face = P3.face_id" +
+			" LEFT OUTER JOIN PhotoPerson P4 ON selection4_face = P4.face_id" +
+			" LEFT OUTER JOIN PhotoPerson P5 ON quiz_face = P5.face_id" +
+			" LEFT OUTER JOIN Person PE1 ON P1.person_id = PE1.person_id" +
+			" LEFT OUTER JOIN Person PE2 ON P2.person_id = PE2.person_id" +
+			" LEFT OUTER JOIN Person PE3 ON P3.person_id = PE3.person_id" +
+			" LEFT OUTER JOIN Person PE4 ON P4.person_id = PE4.person_id" +
+			" LEFT OUTER JOIN Person PE5 ON P5.person_id = PE5.person_id" +
+			" LEFT OUTER JOIN Photo Ph1 ON quiz_image = Ph1.url" +
+			" LEFT OUTER JOIN Photo Ph2 ON selection1 = Ph2.url" +
+			" LEFT OUTER JOIN Photo Ph3 ON selection2 = Ph3.url" +
+			" LEFT OUTER JOIN Photo Ph4 ON selection3 = Ph4.url" +
+			" LEFT OUTER JOIN Photo Ph5 ON selection4 = Ph5.url" +
+			" WHERE solved != 0 and solver_id = ?";
 	private final String SELECT_SOLVED_QUIZ_CNT_SQL = "SELECT count(*) FROM Quiz Where solver_id = ? AND solved != 0";
 	private final String SELECT_QUIZ_SQL = "SELECT Quiz.* FROM Quiz Where solver_id = ? AND solved = 0";
 	private final String SELECT_QUIZ_RESULT_SQL = "SELECT * FROM Quiz WHERE solver_id=? AND DATE(createAt) = CURDATE()";
@@ -133,7 +168,7 @@ public class DBHandler extends Init {
 			+ "WHERE DATE(Photo.taken_at) != DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 100";
 
 	private final String getClassCodeSQL="SELECT class_code FROM Object WHERE code=?";
-	
+
 	public DBHandler() {
 		init();
 	}
@@ -158,6 +193,31 @@ public class DBHandler extends Init {
 			}
 		}
 		conn = null;
+	}
+
+	public ArrayList<HashMap<String, Object>> getSolvedQuizByUsername(String ownerId) {
+		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(SELECT_SOLVED_QUIZ_SQL);
+			ps.setString(1, ownerId);
+			ResultSet rs = ps.executeQuery();
+			ResultSetMetaData md = rs.getMetaData();
+			int columns = md.getColumnCount();
+			while(rs.next()) {
+				HashMap<String, Object> result = new HashMap<String, Object>();
+				for(int i=1; i<=columns; ++i){   
+					result.put(md.getColumnLabel(i),rs.getObject(i));
+				}
+				list.add(result);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
 	}
 
 	public int getSolvedQuizCntByUsername(String ownerId) {
@@ -461,7 +521,7 @@ public class DBHandler extends Init {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void insertPersonRelationWithUpdate(String ownerId, String correctPersonId, String relation)  {
 		PreparedStatement ps;
 		try {
@@ -702,9 +762,9 @@ public class DBHandler extends Init {
 			classCode=rs.getString("class_code");
 		}
 		return classCode;
-		
+
 	}
-	
+
 	public ArrayList<Image> selectAllImagesByTemplateId(int templateType) {
 		PreparedStatement ps = null;
 		ArrayList<Image> images = new ArrayList<Image>();
@@ -736,7 +796,7 @@ public class DBHandler extends Init {
 				int colorV = rs.getInt("color_V");
 				int objectId = rs.getInt("object_id");
 				String objectClassCode=null; 
-				
+
 				Image image = new Image(url, ownerId, GROUP_NAME);
 				image.setAddress(city, district, street);
 				image.setImageTime(takenAt);
@@ -744,7 +804,7 @@ public class DBHandler extends Init {
 				image.setColorH(colorH);
 				image.setColorS(colorS);
 				image.setColorV(colorV);
-				
+
 				if (objectId == 0) {
 					objectClassCode="Null";
 				} else {
@@ -822,7 +882,7 @@ public class DBHandler extends Init {
 				int colorV = rs.getInt("color_V");
 				int objectId = rs.getInt("object_id");
 				String objectClassCode=null; 
-				
+
 				Image image = new Image(url, ownerId, GROUP_NAME);
 				image.setAddress(city, district, street);
 				image.setImageTime(takenAt);
@@ -830,14 +890,14 @@ public class DBHandler extends Init {
 				image.setColorH(colorH);
 				image.setColorS(colorS);
 				image.setColorV(colorV);
-				
+
 				if (objectId == 0) {
 					objectClassCode="Null";
 				} else {
 					objectClassCode=getObjectCode(objectId);
 				}
 				image.setObjectId(objectClassCode);
-				
+
 				String personId = rs.getString("person_id");
 				String name = rs.getString("name");
 				String relationship = rs.getString("relationship");
