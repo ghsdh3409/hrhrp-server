@@ -54,8 +54,9 @@ public class DBHandler extends Init {
 
 	private final String SELECT_PHOTO_PERSON_BY_OWNER_ID_SQL = "SELECT PhotoPerson.* from PhotoPerson INNER JOIN Photo ON PhotoPerson.photo_id = Photo.url where Photo.owner_id = ? and PhotoPerson.person_id = ?  ORDER BY created_at DESC";
 	private final String SELECT_PHOTO_PERSON_BY_PHOTO_PERSON_SQL = "SELECT * FROM PhotoPerson WHERE photo_id =? and person_id = ?";
-	//TODO : Select face id from photo person
-
+	
+	private final String INSERT_DIARY_SQL = "INSERT INTO Diary (owner_id, diary) VALUES(?, ?)";
+	
 	private final String SELECT_SOLVED_QUIZ_SQL = "SELECT Quiz.*," +
 			" P5.person_id as 'quiz_person'," +
 			" P1.person_id as 'selection1_person'," +
@@ -1149,6 +1150,22 @@ public class DBHandler extends Init {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public boolean uploadDiary(String user, String diary) {
+		PreparedStatement ps;
+		try {
+			ps = conn.prepareStatement(INSERT_DIARY_SQL);
+			ps.setString(1, user);
+			ps.setString(2, diary);
+			ps.executeUpdate();
+			ps.close();
+			return true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
 		}
 	}
 
