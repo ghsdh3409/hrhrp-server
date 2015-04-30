@@ -207,7 +207,7 @@ public class GetQuizImages {
 
 		return quizImages;
 	}
-
+	
 	private HashMap<String, ArrayList<Image>> getImagesTemplate5(String ownerId) {
 		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
 
@@ -215,20 +215,27 @@ public class GetQuizImages {
 		ArrayList<Image> correctImages = new ArrayList<Image>();
 		ArrayList<Image> incorrectImages = new ArrayList<Image>();
 
-		ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(5, ownerId);
+		int answerType = 1 + (int)(Math.random() * ((2 - 1) + 1));
+		
+		if (answerType == 1) {
+			ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(5, ownerId);
 
-		if (images.size() > 0) {
+			if (images.size() > 0) {
 
-			personalizedImages = personalization(images, ownerId);
+				personalizedImages = personalization(images, ownerId);
 
-			if (personalizedImages.size() > 0) {
-				Image correctImage = personalizedImages.get(0);
-				correctImages.add(correctImage);
-
-				incorrectImages = dbTemplate.selectImagesByTemplateIdOwner(-5, ownerId);	
+				if (personalizedImages.size() > 0) {
+					Image correctImage = personalizedImages.get(0);
+					correctImages.add(correctImage);				
+				}
 			}
 		}
-
+		
+		if (answerType == 2 || correctImages.size() == 0){
+			incorrectImages = dbTemplate.selectImagesByTemplateIdOwner(-5, ownerId);
+			incorrectImages = getUniquePersonaliedImages(incorrectImages);
+		}
+		
 		quizImages.put(KEY_CORRECT, correctImages);
 		quizImages.put(KEY_INCORRECT, incorrectImages);
 
@@ -394,6 +401,30 @@ public class GetQuizImages {
 		return uniquePersonalizedImages;
 	}
 
+	private ArrayList<Image> getUniquePersonaliedImages(ArrayList<Image> images) {
+		ArrayList<Image> uniquePersonalizedImages = (ArrayList<Image>) images.clone();
+		System.out.println("PREV UPI SIZE " + uniquePersonalizedImages.size());
+		for (Image personalizedImage : images) { //Remove images selected before for quiz.
+			for (Image existedImage : mExistedImages) {
+				if (existedImage.getPersons().size() > 0) {
+					if (existedImage.getPersons().get(0).getPersonId().equals(personalizedImage.getPersons().get(0).getPersonId())) {
+						uniquePersonalizedImages.remove(personalizedImage);
+					}
+				} else {
+					if (existedImage.getUrl().equals(personalizedImage.getUrl())) {
+						uniquePersonalizedImages.remove(personalizedImage);
+					}
+				}
+			}
+		}
+		System.out.println("AFTER UPI SIZE " + uniquePersonalizedImages.size());
+
+		if (uniquePersonalizedImages.size() > 0)
+			mExistedImages.add(uniquePersonalizedImages.get(0)); //Add correct image to existedImages.
+
+		return uniquePersonalizedImages;
+	}
+	
 	public Map sortByValue(Map unsortedMap) {
 		Map sortedMap = new TreeMap(new ValueComparator(unsortedMap));
 		sortedMap.putAll(unsortedMap);

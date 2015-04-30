@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -225,6 +226,7 @@ public class QuizGen {
 			System.out.println(template_id+" 번 템플릿에 해당하는 사진 없음!");
 			return false;
 		}
+
 		//////////////////
 
 		// 퀴즈 출제 날짜
@@ -370,23 +372,34 @@ public class QuizGen {
 		// 사진 속 사람을 오늘 만났나? 
 		else if (template_id==5){
 			quiz_text=quiz_template;
-			if(selectedImages.get("right").size()>0){  // 만남
+
+			long dayDiff = 1;
+
+			if (selectedImages.get("right").size()>0) {
+				answer_number = 1;
+				quiz_image=selectedImages.get("right").get(0);
+				Date imageTime = quiz_image.getImageTime();
+				long timeDiff = System.currentTimeMillis() - imageTime.getTime();
+				dayDiff = (long) Math.ceil((double)timeDiff / (24 * 60 * 60 * 1000));
+			} else {
+				answer_number = 2;
+			}
+			
+			quiz_text=quiz_text.replace("[시간]", String.valueOf(dayDiff));
+			
+			if(answer_number == 1) {  // 만남
 				quiz_image=selectedImages.get("right").get(0);     // 정답이름에 해당하는 사진
 				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
 				if (quiz_image.getPersons().size() > 0) {
 					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
 				}
-
-				answer_number=1;
 			}
-			else{	// 안만남
+			else {	// 안만남
 				quiz_image=selectedImages.get("wrong").get(0);  // 정답이름에 해당하는 사진
 				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
 				if (quiz_image.getPersons().size() > 0) {
 					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
 				}
-
-				answer_number=2;
 			}
 			selection_type="text";
 			selections[0]="만났음";
