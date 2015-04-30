@@ -1,17 +1,26 @@
 package FeatureExtraction;
 
-import java.io.IOException;
-
 public class main {
 	public static void main( String[] args ) throws Exception{
 		
-		String filename = "/home/daehoon/image/025947.jpg";
+		//image file name
+		String filename = "D:/img/2.jpg";
 		StartFeature sf = new StartFeature();
 		
-		String[] hsv = sf.startFromFile(filename);
+		double[] representativeHSV = sf.startFromFile(filename);
 		
-		System.out.println(hsv[0]);
-		System.out.println(hsv[1]);
-		System.out.println(hsv[2]);
+		
+		
+		
+		// [0] : H
+		// [1] : S
+		// [2] : V
+		
+		System.out.println("Representative H = "+representativeHSV[0]);
+		System.out.println("Representative S = "+representativeHSV[1]);
+		System.out.println("Representative V = "+representativeHSV[2]);
+		
+		
+	//	System.out.println("finished!");
 	}
 }

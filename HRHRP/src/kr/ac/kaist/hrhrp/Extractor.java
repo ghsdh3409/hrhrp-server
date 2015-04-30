@@ -210,12 +210,12 @@ public class Extractor extends Init {
 		String filePath = image.getPath();
 		StartFeature sf = new StartFeature();
 
-		String[] tmpHSV = sf.startFromFile(filePath);
+		double[] tmpHSV = sf.startFromFile(filePath);
 
 		int hsv[] = new int[3];
-		hsv[0] = Integer.valueOf(tmpHSV[0].split("h;")[1]);
-		hsv[1] = Integer.valueOf(tmpHSV[1].split("s;")[1]);
-		hsv[2] = Integer.valueOf(tmpHSV[2].split("v;")[1]);
+		hsv[0] = (int) tmpHSV[0];
+		hsv[1] = (int) tmpHSV[1];
+		hsv[2] = (int) tmpHSV[2];
 
 		return hsv;
 

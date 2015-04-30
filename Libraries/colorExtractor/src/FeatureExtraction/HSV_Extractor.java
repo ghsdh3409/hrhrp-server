@@ -2,23 +2,51 @@ package FeatureExtraction;
 
 import org.opencv.core.*;
 import org.opencv.highgui.*;
-import org.opencv.core.*;
 import org.opencv.imgproc.*;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Random;
+import java.util.Vector;
 
+
+class hsv{
+	double h;
+	double s;
+	double v;
+	int clusterId;
+	
+	public hsv(){
+		h = 0.0;
+		s = 0.0;
+		v = 0.0;
+		clusterId = -1;
+	}	
+	
+	public hsv(double _h, double _s, double _v, int _clusterId){
+		h = _h;
+		s = _s;
+		v = _v;
+		clusterId = _clusterId;
+	}
+	
+	int getClusterId() {return clusterId;}
+	void setClusterId(int _clusterId) { clusterId = _clusterId; }
+	
+	double getH() {return h;}
+	double getS() {return s;}
+	double getV() {return v;}
+	
+	void setH(double _h) { h = _h;}
+	void setS(double _s) { s = _s;}
+	void setV(double _v) { v = _v;}
+	
+}
 
 public class HSV_Extractor {
 
 	static {
-		//System.loadLibrary("opencv_java249"); //opencv_java249
-        System.load("/usr/local/share/OpenCV/java/libopencv_java249.so"); //opencv_java249
+		System.loadLibrary("opencv_java249"); //opencv_java249
+        //System.load("/usr/local/share/OpenCV/java/libopencv_java249.so"); //opencv_java249
 
 	}
 
@@ -47,16 +75,10 @@ public class HSV_Extractor {
 		mFilename = _filename;
 	}
 	
-	private void fileDelete(String filePath) {
-		try {
-			File file = new File(filePath);
-			file.delete();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
-	public String[] getMostFrequentHSV() {
+	
+	
+	public double[] getRepresentativeHSV() {
 		String hsvKey = null;
 		Mat hsv = new Mat();
 		hsv = m;
@@ -76,300 +98,167 @@ public class HSV_Extractor {
 		//System.out.println(rowSampleRate + "\t" + colSampleRate);
 		
 		HashMap<String, Integer> hsvValueFreq = new HashMap<String, Integer>();
-		for (int i=0; i<row; i=i+3) {
-			for (int j=0; j<col; j=j+3) {
+		
+		Vector<hsv> hsvSet = new Vector<hsv>();
+		for (int i=0; i<row; i+=3) {
+			for (int j=0; j<col; j+=3) {
 				double h = (hsv.get(i, j)[0] / 180) * 360;
 				double s = (hsv.get(i, j)[1] / 255) * 100;
 				double v = (hsv.get(i, j)[2] / 255) * 100;
 				
+				//System.out.println(h+"\t"+s+"\t"+v);
+				
 				hsvKey = (int)h+"/"+(int)s+"/"+(int)v;
 				
-				if (!hsvValueFreq.containsKey(hsvKey)) {
-					hsvValueFreq.put(hsvKey, 0); 
-				}
-				hsvValueFreq.put(hsvKey, hsvValueFreq.get(hsvKey) + 1);
-				
-				//h_sum += h;
-				//s_sum += s;
-				//v_sum += v;
-				
-				if (h_max < h) {
-					h_max = h;
-				}
-				
-				if (s_max < s) {
-					s_max = s;
-				}
-				
-				if (v_max < v) {
-					v_max = v;
-				}
+				hsvSet.add(new hsv(h, s, v, 0));
 				
 			}
 		}
 		
-		int maxHSV = 0;
-		String maxHSVValue = null;
-		for (String key : hsvValueFreq.keySet()) {
-			int hsvFreq = hsvValueFreq.get(key);
-			if (maxHSV < hsvFreq) {
-				maxHSV = hsvFreq;
-				maxHSVValue = key;
+		
+		
+		//Start K-means algorithm
+		//Parameter : hsvValueContainer, value k, threshold
+		double[] representativeValue = startKmeans(hsvSet, 3, 0.05);	
+		
+		System.out.println("Representative HSV value is following");
+		System.out.println("h = "+representativeValue[0]);
+		System.out.println("s = "+representativeValue[1]);
+		System.out.println("v = "+representativeValue[2]);
+		
+		double[] returnValue = new double[3];
+		returnValue[0] = representativeValue[0];
+		returnValue[1] = representativeValue[1];
+		returnValue[2] = representativeValue[2];
+		
+		
+		return returnValue;
+	}	
+
+	
+	
+	
+	
+	
+	private double[] startKmeans( Vector<hsv> hsvSet, int k, double threshold) {
+		
+		//int numberOfFixel = hsvSet.size();
+		double[][] clusterPoint = new double[k][3];
+		//double threshold = 0.5;
+		
+		Random oRandom = new Random();
+		
+		//Initialize cluster points
+		for(int i = 0; i < k; i++){
+			clusterPoint[i][0] = oRandom.nextDouble();
+			clusterPoint[i][1] = oRandom.nextDouble();
+			clusterPoint[i][2] = oRandom.nextDouble();		
+		}
+		
+		hsv sumCluster[] = new hsv[k];
+		int clusterSize[] = new int[k];
+		
+		for(int i = 0; i < k; i++){
+			sumCluster[i] = new hsv();
+			sumCluster[i].setH(0.0);
+			sumCluster[i].setS(0.0);
+			sumCluster[i].setV(0.0);
+			clusterSize[i] = 0;
+			
+		}
+		
+		
+		
+		//Calculate Kmeans Algorithm
+		double delta = 10000;
+		int cnt = 0;
+		while(delta > threshold && cnt < 50 ){
+			cnt++;
+			System.out.println("cnt = "+cnt);
+			
+			for(int i = 0; i < k; i++){
+				clusterSize[i] = 0;
+				sumCluster[i].setH(0.0);
+				sumCluster[i].setS(0.0);
+				sumCluster[i].setV(0.0);
+			}
+			
+			for (hsv temp : hsvSet){
+				int newCid = getCluster(temp, clusterPoint, k, sumCluster, clusterSize);
+				temp.setClusterId(newCid);
+			}
+			//Adjust Cluster Points
+			double[][] clusterPointOriginal = new double[k][3];
+			
+			for(int i = 0; i < k; i++){
+				for(int l = 0; l < 3; l++){
+					clusterPointOriginal[i][l] = clusterPoint[i][l];
+				}
+			}
+			
+			for (int j = 0; j < k; j++){
+				clusterPoint[j][0] = sumCluster[j].getH() / clusterSize[j];
+				clusterPoint[j][1] = sumCluster[j].getS() / clusterSize[j];
+				clusterPoint[j][2] = sumCluster[j].getV() / clusterSize[j];
+			}
+			
+			for(int p = 0; p < k; p++){
+				delta = 0;
+				delta += Math.abs(clusterPointOriginal[p][0] - clusterPoint[p][0]);
+				delta += Math.abs(clusterPointOriginal[p][1] - clusterPoint[p][1]);
+				delta += Math.abs(clusterPointOriginal[p][2] - clusterPoint[p][2]);
+			}
+			System.out.println("delta = "+delta);
+			
+			for(int i = 0; i < k; i++){
+				System.out.println("Cluster "+i+" Count = "+clusterSize[i]);
 			}
 		}
 		
-		System.out.println(maxHSV + " " + maxHSVValue);
-		
-		String[] hsvSplit = maxHSVValue.split("/");
-		String[] resultHSV = new String[3];
-		resultHSV[0] = "h;" + hsvSplit[0];
-		resultHSV[1] = "s;" + hsvSplit[1];
-		resultHSV[2] = "v;" + hsvSplit[2];
-		
-		//double h_avg = h_sum / (row*col);
-		//double s_avg = s_sum / (row*col);
-		//double v_avg = v_sum / (row*col);
-		
-		//System.out.println(col + "\t" + row + "\t" + m.get(0, 0)[0] + "\t" + m.get(0, 0)[1] + "\t" + m.get(0, 0)[2]);
-		//System.out.println(h_avg + "\t" + s_avg + "\t" + v_avg);
-		//System.out.println(h_max + "\t" + s_max + "\t" + v_max);
-		return resultHSV;
-	}
-	
-	//get svalue
-	public String sStart() throws IOException{
-		
-		String filename = mFilename+"_s.dat";
-		
-		//For Test
-		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
-		StringBuffer sResult = new StringBuffer("");
-		
-		Mat hsv_image = new Mat();
-			
-		if(m.channels() == numberOfChannel){
-			org.opencv.imgproc.Imgproc.cvtColor(m, hsv_image, Imgproc.COLOR_RGB2HSV);
-			java.util.List<Mat> hsv_planes = new LinkedList<Mat>();
-			MatOfFloat vHistRange = new MatOfFloat(0, vHistSize);
-			Mat v_hist = new Mat();
-			boolean accumulate = false;
-			org.opencv.core.Core.split(hsv_image, hsv_planes);
-			java.util.List<Mat> hsv_planes1 = new LinkedList<Mat>();
-			
-			//To get 's' part in picture
-			hsv_planes1.add(hsv_planes.get(1));
-
-			//Calculate histogram
-			Imgproc.calcHist(hsv_planes1, 
-					new MatOfInt(0), new Mat(), v_hist , 
-					new MatOfInt(vHistSize), 
-					vHistRange,
-					accumulate);
-			
-			Mat vHistImage = new Mat(vHist_w, vHist_h, org.opencv.core.CvType.CV_8UC3, new Scalar(0, 0, 0));
-			
-			//Normalization
-			Core.normalize(v_hist, v_hist, 0, vHistImage.rows(), Core.NORM_MINMAX, -1, new Mat());
-			
-			//Approximation
-			approximateSV(v_hist, vMax, out, sResult, 's');
-			
-		}
-		else{
-			System.out.println("There are some problems in image channel");
-		}
-
-		out.close();
-		fileDelete(filename);
-		return sResult.toString();
-	}
-	
-	//getv_value
-	public String vStart() throws IOException{
-		
-		String filename = mFilename+"_v.dat";
-		
-		StringBuffer vResult = new StringBuffer("");
-		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
-
-		Mat hsv_image = new Mat();
-			
-		if(m.channels() == numberOfChannel){
-			org.opencv.imgproc.Imgproc.cvtColor(m, hsv_image, Imgproc.COLOR_RGB2HSV);
-			java.util.List<Mat> hsv_planes = new LinkedList<Mat>();
-			MatOfFloat vHistRange = new MatOfFloat(0, vHistSize);
-			Mat v_hist = new Mat();
-			boolean accumulate = false;
-			org.opencv.core.Core.split(hsv_image, hsv_planes);
-			java.util.List<Mat> hsv_planes1 = new LinkedList<Mat>();
-			
-			//To get 'v' part in the picture.
-			hsv_planes1.add(hsv_planes.get(2));
-
-			Imgproc.calcHist(hsv_planes1, 
-					new MatOfInt(0), new Mat(), v_hist , 
-					new MatOfInt(vHistSize), 
-					vHistRange,
-					accumulate);
-			
-			Mat vHistImage = new Mat(vHist_w, vHist_h, org.opencv.core.CvType.CV_8UC3, new Scalar(0, 0, 0));
-			Core.normalize(v_hist, v_hist, 0, vHistImage.rows(), Core.NORM_MINMAX, -1, new Mat());
-			approximateSV(v_hist, vMax, out, vResult, 'v');
-			
-		}
-		else{
-			System.out.println("There are some problems in image channel");
-		}
-		out.close();
-		
-		fileDelete(filename);
-		return vResult.toString();
-	}
-
-	//get hvalue
-	public String hStart() throws IOException{
-		
-		String filename = mFilename+"_h.dat";
-		
-		StringBuffer hResult = new StringBuffer("");
-		BufferedWriter out = new BufferedWriter(new FileWriter(filename));
-		
-		Mat hsv_image = new Mat();
-			
-		if(m.channels() == numberOfChannel){
-		
-			org.opencv.imgproc.Imgproc.cvtColor(m, hsv_image, Imgproc.COLOR_RGB2HSV);
-			
-			java.util.List<Mat> hsv_planes = new LinkedList<Mat>();
-			
-			MatOfFloat hHistRange = new MatOfFloat(0, hHistSize);
-			
-			Mat h_hist = new Mat();
-			boolean accumulate = false;
-			
-			org.opencv.core.Core.split(hsv_image, hsv_planes);
-			
-			java.util.List<Mat> hsv_planes1 = new LinkedList<Mat>();
-			
-			//To get 'h' elements
-			hsv_planes1.add(hsv_planes.get(0));
-			  
-			Imgproc.calcHist(hsv_planes1, 
-					new MatOfInt(0), new Mat(), h_hist , 
-					new MatOfInt(hHistSize), 
-					hHistRange,
-					accumulate);
-			
-			Mat hHistImage = new Mat(hHist_w, hHist_h, org.opencv.core.CvType.CV_8UC3, new Scalar(0, 0, 0));
-			
-			//Normalization
-			Core.normalize(h_hist, h_hist, 0, hHistImage.rows(), Core.NORM_MINMAX, -1, new Mat());
-			
-			//Approximation
-			approximateH(h_hist, hMax, out, hResult);
-
-		
-		}
-		else{
-			System.out.println("There are some problems in image channel");
-		}
-
-		out.close();
-		
-		fileDelete(filename);
-		return hResult.toString();
-	}
-	
-	
-	private int getMostFrequentNumber(ArrayList<Double> list) {
-		HashMap<Integer, Integer> freq = new HashMap<Integer, Integer> ();
-		for (int i=0; i<list.size(); i++) {
-			int number = list.get(i).intValue();
-			if (!freq.containsKey(number))
-				freq.put(number, 0);
-			freq.put(number, freq.get(number)+1);
-		}
-		
-		int max = -1;
+		System.out.println("Cnt = "+cnt);
+		int max = 0;
 		int maxIdx = -1;
-		for (int key : freq.keySet()) {
-			int freqNum = freq.get(key);
-			
-			if (max < freqNum) {
-				maxIdx = key;
-				max = freqNum;
+		for(int i = 0; i < k; i++){
+			if(clusterSize[i] > max){
+				max = clusterSize[i];
+				maxIdx = i;
+			}
+		}
+		System.out.println("Largest cluster ID = "+maxIdx);
+		return clusterPoint[maxIdx];
+	}
+
+
+
+
+	private int getCluster(hsv temp, double[][] clusterPoint, int k, hsv[] sumCluster, int[] clusterSize) {
+		
+		int newCid = -1;
+		double maxDist = 100000000;
+		
+		double temp_h = temp.getH();
+		double temp_s = temp.getS();
+		double temp_v = temp.getV();
+		
+		for(int i = 0; i < k; i++){
+			double dist = Math.sqrt(
+					Math.pow((temp_h - clusterPoint[i][0]),2) +  
+					Math.pow((temp_s - clusterPoint[i][1]),2) +  
+					Math.pow((temp_v - clusterPoint[i][2]),2)
+					);
+			if(dist < maxDist){
+				maxDist = dist;
+				newCid = i;
 			}
 		}
 		
-		return maxIdx;
-	}
-	
-	private void approximateSV(Mat v_hist, int hmax2, BufferedWriter out, StringBuffer stb, char sv) throws IOException {
-		int i, x, tmp, color_max = -1, idx = 0, w_bin = Math.round( 256 / vHistSize);
-		int[] sv_table = new int[numberOfSV];
-		
-		for(i = 0; i < numberOfSV; i++){
-			sv_table[i] = 0;
-		}
-	
-		ArrayList<Double> valueList = new ArrayList<Double>();
-		
-		for(i = 0; i < hmax2; i++){
-			x = i * w_bin;
-			double[] t = v_hist.get(i,0);
-			tmp = Integer.valueOf((int) Math.round(t[0]));
-			
-			for (int j=0; j<tmp; j++) {
-				valueList.add((i / 255.0)*100);		
-			}	
-		}
+		sumCluster[newCid].setH(sumCluster[newCid].getH() + temp_h);
+		sumCluster[newCid].setS(sumCluster[newCid].getS() + temp_s);
+		sumCluster[newCid].setV(sumCluster[newCid].getV() + temp_v);
 
-		int mostFrequentValue = getMostFrequentNumber(valueList);
+		clusterSize[newCid]++;
 		
-		//int mostFrequentValue = (int) average(valueList);
 		
-		stb.append(sv + ";" + mostFrequentValue);
-
-	}
-	
-	public static double average(ArrayList<Double> list) {
-		System.out.println(list.size());
-	    // 'average' is undefined if there are no elements in the list.
-	    if (list == null || list.isEmpty())
-	        return 0.0;
-	    // Calculate the summation of the elements in the list
-	    long sum = 0;
-	    int n = list.size();
-	    // Iterating manually is faster than using an enhanced for loop.
-	    for (int i = 0; i < n; i++)
-	        sum += list.get(i);
-	    // We don't want to perform an integer division, so the cast is mandatory.
-	    return ((double) sum) / n;
-	}
-	
-	private void approximateH(Mat hist, int histSize, BufferedWriter out, StringBuffer stb ) throws IOException{
-		int i, x, tmp, color_max = -1, idx = 0, w_bin = Math.round( hMax / histSize);
-		int[] color_table = new int[numberOfColor];
-		
-		//initialize
-		for(i = 0; i < numberOfColor; i++){
-			color_table[i] = 0;
-		}
-		
-		ArrayList<Double> valueList = new ArrayList<Double>();
-		
-		for(i = 0; i < histSize; i++){
-			x = i * w_bin;
-			double[] t = hist.get(i,0);
-			
-			tmp = Integer.valueOf((int) Math.round(t[0]));
-			
-			for (int j=0; j<tmp; j++) {
-				valueList.add(i * 2.0);		
-			}	
-		}  	
-		int mostFrequentValue = getMostFrequentNumber(valueList);
-		//int mostFrequentValue = (int) average(valueList);
-		stb.append("h" + ";" + mostFrequentValue);
+		return newCid;
 	}
 }
