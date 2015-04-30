@@ -199,7 +199,7 @@ public class GetQuizImages {
 				}
 
 				if (incorrectImages.size() < 4)
-					addIncorrectImageforTemplate(3, ownerId, 4, incorrectImages, correctImage);
+					addIncorrectImageforTemplate(4, ownerId, 4, incorrectImages, correctImage);
 			}
 		}
 		quizImages.put(KEY_CORRECT, correctImages);

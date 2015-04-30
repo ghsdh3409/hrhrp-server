@@ -136,37 +136,37 @@ public class DBHandler extends Init {
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE Person.name is not null LIMIT 100";
+			+ "WHERE Person.name is not null LIMIT 1000";
 
 	private final String SELECT_ALL_PHOTO_BY_T2 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE PersonPerson.relationship is not null LIMIT 100";
+			+ "WHERE PersonPerson.relationship is not null LIMIT 1000";
 
 	private final String SELECT_ALL_PHOTO_BY_T3 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE Person.name is not null LIMIT 100";
+			+ "WHERE Person.name is not null LIMIT 1000";
 
 	private final String SELECT_ALL_PHOTO_BY_T4 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE PersonPerson.relationship is not null LIMIT 100";
+			+ "WHERE PersonPerson.relationship is not null LIMIT 1000";
 
 	private final String SELECT_ALL_PHOTO_BY_T5 = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE DATE(Photo.taken_at) >= DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 100";
+			+ "WHERE DATE(Photo.taken_at) >= DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 1000";
 
 	private final String SELECT_ALL_PHOTO_BY_T5_NOT = "SELECT Photo.owner_id, Photo.url as 'photo_id', Photo.weather, Photo.city, Photo.district, Photo.street, Photo.taken_at, PhotoPerson.person_id, PhotoPerson.face_id, PhotoPerson.width, PhotoPerson.height, PhotoPerson.center_x, PhotoPerson.center_y, Person.name, PersonPerson.relationship, Photo.color_H, Photo.color_S, Photo.color_V, Photo.object_id FROM Photo "
 			+ "JOIN PhotoPerson ON PhotoPerson.photo_id = Photo.url "
 			+ "JOIN Person ON Person.person_id = PhotoPerson.person_id "
 			+ "JOIN PersonPerson ON Person.person_id = PersonPerson.person_id and Photo.owner_id = PersonPerson.owner_id "
-			+ "WHERE DATE(Photo.taken_at) < DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 100";
+			+ "WHERE DATE(Photo.taken_at) < DATE_ADD(CURDATE(), INTERVAL -1 DAY) LIMIT 1000";
 
 	
 	private final String getClassCodeSQL="SELECT class_code FROM Object WHERE code=?";
