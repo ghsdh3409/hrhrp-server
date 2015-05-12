@@ -16,7 +16,8 @@ public class QuizGen {
 	private ArrayList<String> default_name=new ArrayList<String>();
 	private ArrayList<String> default_relation=new ArrayList<String>();
 
-	private final int SUPPORTED_TEMPLATE_NUM = 5; 
+	private final int[] SUPPORTED_TEMPLATE_LIST = {1,2,3,4,5,10};
+	//private final int SUPPORTED_TEMPLATE_NUM = 6; 
 	//private final String ARFF_PATH = "D:/arff/";
 	private final String ARFF_PATH = "/home/daehoon/HRHRP/personalized/arff/";
 	// 생성자
@@ -42,7 +43,8 @@ public class QuizGen {
 			return templateDistributionList.get(0);
 		} else {
 			// 랜덤 숫자 생성하도록!
-			return genRandNumber(1,SUPPORTED_TEMPLATE_NUM);
+			int randIdx = genRandNumber(1,SUPPORTED_TEMPLATE_LIST.length);
+			return SUPPORTED_TEMPLATE_LIST[randIdx - 1];
 		}
 	}
 
@@ -65,7 +67,8 @@ public class QuizGen {
 
 	private HashMap<Integer, Float> generateListWrongRatioOfTemplateId(String userId) {
 		HashMap<Integer, Float> ratioListofTemplate = new HashMap<Integer, Float>();
-		for (int templateId = 1; templateId <= SUPPORTED_TEMPLATE_NUM; templateId++) {
+		for (int templateIdx = 0; templateIdx < SUPPORTED_TEMPLATE_LIST.length; templateIdx++) {
+			int templateId = SUPPORTED_TEMPLATE_LIST[templateIdx];
 			float wrongRatio = getWrongRatioOfTemplateID(userId, templateId);
 			ratioListofTemplate.put(templateId, wrongRatio);
 		}
@@ -163,7 +166,7 @@ public class QuizGen {
 			ArrayList<Integer> templateDistributionList = getNormalizedRatioCntofTemplateId(solver_id);
 			Set<Integer> templateDistributionSet = new HashSet<Integer>(templateDistributionList);
 
-			while(curNum < numOfQuiz && failedTemplateSet.size() < SUPPORTED_TEMPLATE_NUM){		
+			while(curNum < numOfQuiz && failedTemplateSet.size() < SUPPORTED_TEMPLATE_LIST.length){		
 
 				if (templateDistributionSet.size() > failedTemplateSet.size() && curNum < personalizedQuizNum)
 					isPersonalized = true;
@@ -406,7 +409,39 @@ public class QuizGen {
 			selections[1]="만나지 않았음";
 			selections[2]=selections[3]=null;
 		}
+		
+		// Is a following picture taken on last week?
+		else if (template_id==10){
+			quiz_text=quiz_template;
 
+			if (selectedImages.get("right").size()>0) {
+				answer_number = 1;
+			} else {
+				answer_number = 2;
+			}
+						
+			if(answer_number == 1) {  // 만남
+				quiz_image=selectedImages.get("right").get(0);     // 정답이름에 해당하는 사진
+				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
+				if (quiz_image.getPersons().size() > 0) {
+					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+				}
+			}
+			else {	// 안만남
+				quiz_image=selectedImages.get("wrong").get(0);  // 정답이름에 해당하는 사진
+				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
+				if (quiz_image.getPersons().size() > 0) {
+					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+				}
+			}
+			selection_type="text";
+			selections[0]="지난 주에 촬영됨";
+			selections[1]="지난 주에 촬영되지 않음";
+			selections[2]=selections[3]=null;
+		}
+
+		/*
+		
 		// 사진들 중 오늘과 관련있는 사진은?  
 		else if (template_id==6){
 			quiz_text=quiz_template;
@@ -468,6 +503,7 @@ public class QuizGen {
 				}
 			}
 		}
+		*/
 		this.quizToDB(template_id, solver_id, quiz_text, quiz_image_url,selection_type, selections, answer_number, quiz_face_id, selections_faces);
 		return true;
 	}

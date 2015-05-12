@@ -47,6 +47,8 @@ public class GetQuizImages {
 			return getImagesTemplate4(user);
 		} else if (templateType == 5) {
 			return getImagesTemplate5(user);
+		} else if (templateType == 10) {
+			return getImagesTemplate10(user);
 		} else {
 			return null;
 		}
@@ -242,6 +244,40 @@ public class GetQuizImages {
 		return quizImages;
 	}
 
+	private HashMap<String, ArrayList<Image>> getImagesTemplate10(String ownerId) {
+		HashMap<String, ArrayList<Image>> quizImages = new HashMap<String, ArrayList<Image>>();
+
+		ArrayList<Image> personalizedImages = new ArrayList<Image>();
+		ArrayList<Image> correctImages = new ArrayList<Image>();
+		ArrayList<Image> incorrectImages = new ArrayList<Image>();
+
+		int answerType = 1 + (int)(Math.random() * ((2 - 1) + 1));
+		
+		if (answerType == 1) {
+			ArrayList<Image> images = dbTemplate.selectImagesByTemplateIdOwner(10, ownerId);
+
+			if (images.size() > 0) {
+
+				personalizedImages = personalization(images, ownerId);
+
+				if (personalizedImages.size() > 0) {
+					Image correctImage = personalizedImages.get(0);
+					correctImages.add(correctImage);				
+				}
+			}
+		}
+		
+		if (answerType == 2 || correctImages.size() == 0){
+			incorrectImages = dbTemplate.selectImagesByTemplateIdOwner(-10, ownerId);
+			incorrectImages = getUniquePersonaliedImages(incorrectImages);
+		}
+		
+		quizImages.put(KEY_CORRECT, correctImages);
+		quizImages.put(KEY_INCORRECT, incorrectImages);
+
+		return quizImages;
+	}
+	
 	private boolean isEqualImage(Image existedImage, Image image) {
 		String imagePersonId = image.getPersons().get(0).getPersonId();
 		String imageRelation = image.getPersons().get(0).getPersonRelation();
