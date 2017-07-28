@@ -14,9 +14,9 @@ public class PhotoFilter {
 	}
 
 	/*
-	// folderName Æú´õ¿¡ ÀÖ´Â »çÁøµé Áß¿¡¼­ °ñ¶ó³»±â!
+	// folderName í´ë”ì— ìˆëŠ” ì‚¬ì§„ë“¤ ì¤‘ì—ì„œ ê³¨ë¼ë‚´ê¸°!
 	public ArrayList<File> selectPhotos(String folderName){
-		// ¼±º°µÈ »çÁøµéÀ» ÀúÀåÇÏ´Â ¸®½ºÆ®
+		// ì„ ë³„ëœ ì‚¬ì§„ë“¤ì„ ì €ì¥í•˜ëŠ” ë¦¬ìŠ¤íŠ¸
 		ArrayList<File> selectedPhotoList = new ArrayList<File>();
 
 		File folder=new File(folderName);
@@ -26,12 +26,12 @@ public class PhotoFilter {
 		File file1, file2;
 		double sim;
 
-		// Ã¹ »çÁøÀº ¿ì¼± ÀúÀåÇÏ´Ù.
+		// ì²« ì‚¬ì§„ì€ ìš°ì„  ì €ì¥í•˜ë‹¤.
 		selectedPhotoList.add(files[0]);
 
-		// °¢ »çÁøµé¿¡ ´ëÇØ...
+		// ê° ì‚¬ì§„ë“¤ì— ëŒ€í•´...
 		for (int i=0;i<numOfFiles-1;i++){
-			//System.out.println((i+1)+ "¹øÂ° photo!");
+			//System.out.println((i+1)+ "ë²ˆì§¸ photo!");
 			file1=new File(folderName+"/"+files[i].getName());
 			file2=new File(folderName+"/"+files[i+1].getName());
 
@@ -48,7 +48,7 @@ public class PhotoFilter {
 	}
 	 */
 
-	// folderName Æú´õ¿¡ ÀÖ´Â »çÁøµé Áß¿¡¼­ °ñ¶ó³»±â!
+	// folderName í´ë”ì— ìˆëŠ” ì‚¬ì§„ë“¤ ì¤‘ì—ì„œ ê³¨ë¼ë‚´ê¸°!
 	public ArrayList<String> selectPhotos(String srcFolderName, String destFolderName){
 		ArrayList<File> selectedPhotoList = new ArrayList<File>();
 		ArrayList<File> processedFileList = new ArrayList<File>();
@@ -71,7 +71,7 @@ public class PhotoFilter {
 		//System.out.println(this.getCosSimilarity(new File("C:\\img\\f.jpg"), new File("C:\\img\\g.jpg")));
 
 		for(int i=0;i<files.length;i++){
-			//System.out.println((i+1)+ "¹øÂ° photo!");
+			//System.out.println((i+1)+ "ë²ˆì§¸ photo!");
 			current=i;
 			file1=new File(srcFolderName+"/"+files[current].getName());
 			survived=true;
@@ -136,7 +136,7 @@ public class PhotoFilter {
 	public double[] getHistogram(File imageFile){
 		System.out.println(imageFile.getPath());
 
-		// °¢ ÀÌ¹ÌÁöµéÀÇ »ö»óÁ¤º¸¸¦ ´ã´Â º¤ÅÍ (512°¡Áö »öÀÇ Á¶ÇÕ)
+		// ê° ì´ë¯¸ì§€ë“¤ì˜ ìƒ‰ìƒì •ë³´ë¥¼ ë‹´ëŠ” ë²¡í„° (512ê°€ì§€ ìƒ‰ì˜ ì¡°í•©)
 		double [] vector=new double[512];
 
 		BufferedImage image=null;
@@ -153,10 +153,10 @@ public class PhotoFilter {
 
 			double de=image.getWidth()*image.getHeight();
 
-			// ½ÇÁ¦ °ªÀ» ÀúÀå (0~255)
+			// ì‹¤ì œ ê°’ì„ ì €ì¥ (0~255)
 			int color,red,green,blue;
 
-			// quantized µÇ´Â °ªÀ» ÀúÀå (0~8) 
+			// quantized ë˜ëŠ” ê°’ì„ ì €ì¥ (0~8) 
 			int red_idx,green_idx,blue_idx;
 
 			for (int x=0;x<image.getWidth();x++){
