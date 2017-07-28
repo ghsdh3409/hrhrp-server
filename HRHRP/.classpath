@@ -35,5 +35,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/opencvtest"/>
+	<classpathentry kind="lib" path="/FaceRecognition/libs/faceppsdk_min.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

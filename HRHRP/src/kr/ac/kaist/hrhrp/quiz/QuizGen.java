@@ -3,6 +3,8 @@ package kr.ac.kaist.hrhrp.quiz;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,50 +15,102 @@ public class QuizGen {
 	private JDBC jdbc;
 	private ArrayList<String> default_name=new ArrayList<String>();
 	private ArrayList<String> default_relation=new ArrayList<String>();
-	
-	private final int SUPPORTED_TEMPLATE_NUM = 5; 
-	
-	GetQuizImages getQuizImages;
-	
+
+	private final int[] SUPPORTED_TEMPLATE_LIST = {1,2,3,4,5,10};
+	//private final int SUPPORTED_TEMPLATE_NUM = 6; 
+	//private final String ARFF_PATH = "D:/arff/";
+	private final String ARFF_PATH = "/home/daehoon/HRHRP/personalized/arff/";
 	// 생성자
 	public QuizGen(){
 		jdbc=new JDBC();
 		jdbc.setConnection();
-		
+
 		default_name.add("이재길");
 		default_name.add("이유리");
 		default_name.add("박신혜");
 		default_name.add("이민호");
-		
+
 		default_relation.add("아버지");
 		default_relation.add("어머니");
 		default_relation.add("친구");
 		default_relation.add("지도교수");
-		
-		getQuizImages = new GetQuizImages();
 	}
-	
+
 	// 어떤 템플릿의 퀴즈를 출제할 지 결정
-	int selectTemplateID(){
-		// 랜덤 숫자 생성하도록!
-		return genRandNumber(1,SUPPORTED_TEMPLATE_NUM);
+	private int selectTemplateID(String userId, int numOfQuiz, ArrayList<Integer> templateDistributionList, boolean isPersonalized) {
+		if (isPersonalized && templateDistributionList.size() > 0) {
+			Collections.shuffle(templateDistributionList);
+			return templateDistributionList.get(0);
+		} else {
+			// 랜덤 숫자 생성하도록!
+			int randIdx = genRandNumber(1,SUPPORTED_TEMPLATE_LIST.length);
+			return SUPPORTED_TEMPLATE_LIST[randIdx - 1];
+		}
 	}
-	
+
+	private ArrayList<Integer> getNormalizedRatioCntofTemplateId (String userId) {
+		HashMap<Integer, Float> ratioListofTemplate = generateListWrongRatioOfTemplateId(userId);
+		System.out.println("WrongRationList " + ratioListofTemplate.values());
+
+		ArrayList<Integer> templateDistributionList = new ArrayList<Integer>();
+
+		for (int templateId : ratioListofTemplate.keySet()) {
+			float ratio = ratioListofTemplate.get(templateId);
+			float normalizedRatio = ratio * 10;
+			for (int i=0; i<normalizedRatio; i++) {
+				templateDistributionList.add(templateId);
+			}
+		}
+
+		return templateDistributionList;
+	}
+
+	private HashMap<Integer, Float> generateListWrongRatioOfTemplateId(String userId) {
+		HashMap<Integer, Float> ratioListofTemplate = new HashMap<Integer, Float>();
+		for (int templateIdx = 0; templateIdx < SUPPORTED_TEMPLATE_LIST.length; templateIdx++) {
+			int templateId = SUPPORTED_TEMPLATE_LIST[templateIdx];
+			float wrongRatio = getWrongRatioOfTemplateID(userId, templateId);
+			ratioListofTemplate.put(templateId, wrongRatio);
+		}
+		return ratioListofTemplate;
+	}
+
+	private float getWrongRatioOfTemplateID(String user_id, int template_id){
+		float wrongRatio=0;
+		try {
+			ArrayList<Integer> correctInfoList=jdbc.getCorrectInfoOfTemplateID(user_id, template_id);
+			if (correctInfoList.size()>0){
+				int totalCnt=correctInfoList.size();
+				int wrongCnt=0;
+				for(int c : correctInfoList){
+					if (c==0){
+						wrongCnt++;
+					}
+				}
+				wrongRatio=(float)wrongCnt/totalCnt;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return wrongRatio;
+	}
+
 	// 퀴즈 출제 날짜 (오늘) 생성
-	String getTodayDate(){
+	private String getTodayDate(){
 		java.util.Date d = new java.util.Date();
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd"); 
 		return df.format(d); 
 	}
-	
+
 	// 1번부터 4번 중, 정답 선택지 번호 생성 (랜덤)
-	int genRandNumber(int min, int max){
+	private int genRandNumber(int min, int max){
 		int r=min + (int)(Math.random() * ((max - min) + 1));
 		return r;
 	}
-	
+
 	// 퀴즈DB에 퀴즈 추가
-	void quizToDB(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number, String quiz_face, String[] selections_face){
+	private void quizToDB(int template_id, String solver_id, String quiz_text, String quiz_image, String selection_type, String[] selections, int answer_number, String quiz_face, String[] selections_face){
 		try {
 			jdbc.insertQuiz(template_id, solver_id, quiz_text, quiz_image, selection_type, selections, answer_number, quiz_face, selections_face);
 		} catch (SQLException e) {
@@ -65,9 +119,9 @@ public class QuizGen {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// 시간으로부터 시간대 구하기
-	String getTimeslot(int hour){
+	private String getTimeslot(int hour){
 		if (hour>=6 && hour<=11) return "아침 (6시~11시)";
 		else if (hour>11 && hour<=14) return "점심 (12시~14시)";
 		else if (hour>14 && hour<=18) return "오후 (15시~18시)";
@@ -75,9 +129,9 @@ public class QuizGen {
 		else if (hour>20 && hour<=23) return "밤 (21시~23시)";
 		else return "새벽 (24시~5시)";
 	}
-	
+
 	// 배열 멤버십 테스트
-	boolean membership(String a, String[] array){
+	private boolean membership(String a, String[] array){
 		for(int i=0;i<array.length;i++){
 			if(array[i]!=null){
 				if(array[i].equals(a)){
@@ -87,35 +141,63 @@ public class QuizGen {
 		}
 		return false;
 	}
-	
+
 	// 퀴즈 세트 생성 함수
-	public int generateQuizset(int numOfQuiz, String solver_id){
-		Set failedTemplateSet = new HashSet();
+	public int generateQuizset(int numOfQuiz, String solver_id, float personalizedRatio){
+		Set<Integer> failedTemplateSet = new HashSet<Integer>();
 		int template_id;
 		int curNum=0;
 		// numOfQuiz 개수만큼 퀴즈를 생성하고, DB에 저장한다.
-		
-		while(curNum<numOfQuiz && failedTemplateSet.size() < SUPPORTED_TEMPLATE_NUM){
-			// 퀴즈 템플릿을 선택한다.
-			template_id=selectTemplateID();
-			
-			// 퀴즈를 출제하고 DB에 저장한다. 출제 성공하면 퀴즈 수 하나 증가!
-			if (generateQuiz(template_id,solver_id)){
-				curNum++;
+
+		try {
+
+			int personalizedQuizNum = (int) (numOfQuiz * personalizedRatio); //Personalization + Random
+			boolean isPersonalized = true;
+
+			ArrayList<Image> existedImages = new ArrayList<Image>(); // This list contains selected image before. DAEHOONKIM
+
+			QuizAnalyzer qa = new QuizAnalyzer(ARFF_PATH);
+			if (personalizedRatio > 0.0f) {
+				qa.analyzeQuiz(solver_id,true);
 			} else {
-				failedTemplateSet.add(template_id);
+				qa.analyzeQuiz(solver_id, false);
 			}
+
+			ArrayList<Integer> templateDistributionList = getNormalizedRatioCntofTemplateId(solver_id);
+			Set<Integer> templateDistributionSet = new HashSet<Integer>(templateDistributionList);
+
+			while(curNum < numOfQuiz && failedTemplateSet.size() < SUPPORTED_TEMPLATE_LIST.length){		
+
+				if (templateDistributionSet.size() > failedTemplateSet.size() && curNum < personalizedQuizNum)
+					isPersonalized = true;
+				else
+					isPersonalized = false;
+
+				// 퀴즈 템플릿을 선택한다.
+				template_id=selectTemplateID(solver_id, numOfQuiz, templateDistributionList, isPersonalized);
+				System.out.println("TEMPLATE " + template_id);
+
+				// 퀴즈를 출제하고 DB에 저장한다. 출제 성공하면 퀴즈 수 하나 증가!
+				if (generateQuiz(template_id,solver_id, existedImages, isPersonalized)){ // This list contains selected image before. DAEHOONKIM
+					curNum++;
+				} else {
+					failedTemplateSet.add(template_id);					
+				}
+			}
+
+			System.out.print("FAILED TEMPLATE :: " + failedTemplateSet.toString());
+
+			jdbc.endConnection();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		System.out.print("FAILED TEMPLATE :: " + failedTemplateSet.toString());
-		
 		return curNum;
 	}
-	
-	
+
+
 	// 퀴즈 생성 함수
-	boolean generateQuiz(int template_id, String solver_id){
-		
+	private boolean generateQuiz(int template_id, String solver_id, ArrayList<Image> existedImages, boolean isPersonalized){
+
 		String quiz_template="";
 		String quiz_text="";
 		Image quiz_image=null;
@@ -127,7 +209,7 @@ public class QuizGen {
 		int answer_number=0;
 		//String quiz_date="";
 		//PhotoSelector ps=new PhotoSelector();
-		
+
 		// 템플릿 ID로부터 템플릿 구함
 		try {
 			quiz_template=jdbc.getTemplate(template_id);
@@ -136,19 +218,23 @@ public class QuizGen {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		// ImageSelector로 부터 퀴즈 생성 관련된 사진들을 얻어옴
 		//public Image(String aUrl, String aImageownerId, String aGroupName)
-		HashMap<String, ArrayList<Image>> selectedImages = getQuizImages.getQuizImages(template_id, solver_id);
+		GetQuizImages getQuizImages = new GetQuizImages(ARFF_PATH);
+		HashMap<String, ArrayList<Image>> selectedImages = getQuizImages.getQuizImages(template_id, solver_id, existedImages, isPersonalized); // This list contains selected image before. DAEHOONKIM
+		getQuizImages.close();
+
 		if (selectedImages.get("right").size()==0 && selectedImages.get("wrong").size()==0){
 			System.out.println(template_id+" 번 템플릿에 해당하는 사진 없음!");
 			return false;
 		}
+
 		//////////////////
-		
+
 		// 퀴즈 출제 날짜
 		//quiz_date=getTodayDate();
-		
+
 		// 사진 속 사람의 이름은?  OK!
 		if(template_id==1){
 			quiz_text=quiz_template;
@@ -161,7 +247,7 @@ public class QuizGen {
 			selection_type="text";											// 텍스트 보기
 			String person_name;
 			int wrongIdx=0;
-			
+
 			selections[answer_number-1]=selectedImages.get("right").get(0).getPersons().get(0).getPersonName();		// 정답 답지 만들기
 			// 오답답지 만들기
 			for(int i=0;i<4;i++){
@@ -192,7 +278,7 @@ public class QuizGen {
 			selection_type="text";
 			String person_id, relation;
 			int wrongIdx=0;
-			
+
 			// 정답 답지 만들기
 			person_id=selectedImages.get("right").get(0).getPersons().get(0).getPersonId();
 			try {
@@ -241,10 +327,12 @@ public class QuizGen {
 					}
 				}
 				else{
-					Image image = selectedImages.get("wrong").get(wrongIdx++);
-					selections[i]=image.getUrl();		// 오답
-					if (image.getPersons().size() > 0) {
-						selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						Image image = selectedImages.get("wrong").get(wrongIdx++);
+						selections[i]=image.getUrl();		// 오답
+						if (image.getPersons().size() > 0) {
+							selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+						}
 					}
 				}
 			}
@@ -274,10 +362,12 @@ public class QuizGen {
 					}
 				}
 				else{
-					Image image = selectedImages.get("wrong").get(wrongIdx++);
-					selections[i]=image.getUrl();		// 오답
-					if (image.getPersons().size() > 0) {
-						selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						Image image = selectedImages.get("wrong").get(wrongIdx++);
+						selections[i]=image.getUrl();		// 오답
+						if (image.getPersons().size() > 0) {
+							selections_faces[i] = image.getPersons().get(0).getFaces().get(0).getFaceId();
+						}
 					}
 				}
 			}
@@ -285,29 +375,72 @@ public class QuizGen {
 		// 사진 속 사람을 오늘 만났나? 
 		else if (template_id==5){
 			quiz_text=quiz_template;
-			if(selectedImages.get("right").size()>0){  // 만남
+
+			long dayDiff = 1;
+
+			if (selectedImages.get("right").size()>0) {
+				answer_number = 1;
+				quiz_image=selectedImages.get("right").get(0);
+				Date imageTime = quiz_image.getImageTime();
+				long timeDiff = System.currentTimeMillis() - imageTime.getTime();
+				dayDiff = (long) Math.ceil((double)timeDiff / (24 * 60 * 60 * 1000));
+			} else {
+				answer_number = 2;
+			}
+			
+			quiz_text=quiz_text.replace("[시간]", String.valueOf(dayDiff));
+			
+			if(answer_number == 1) {  // 만남
 				quiz_image=selectedImages.get("right").get(0);     // 정답이름에 해당하는 사진
 				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
 				if (quiz_image.getPersons().size() > 0) {
 					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
 				}
-				
-				answer_number=1;
 			}
-			else{	// 안만남
+			else {	// 안만남
 				quiz_image=selectedImages.get("wrong").get(0);  // 정답이름에 해당하는 사진
 				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
 				if (quiz_image.getPersons().size() > 0) {
 					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
 				}
-				
-				answer_number=2;
 			}
 			selection_type="text";
 			selections[0]="만났음";
 			selections[1]="만나지 않았음";
 			selections[2]=selections[3]=null;
 		}
+		
+		// Is a following picture taken on last week?
+		else if (template_id==10){
+			quiz_text=quiz_template;
+
+			if (selectedImages.get("right").size()>0) {
+				answer_number = 1;
+			} else {
+				answer_number = 2;
+			}
+						
+			if(answer_number == 1) {  // 만남
+				quiz_image=selectedImages.get("right").get(0);     // 정답이름에 해당하는 사진
+				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
+				if (quiz_image.getPersons().size() > 0) {
+					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+				}
+			}
+			else {	// 안만남
+				quiz_image=selectedImages.get("wrong").get(0);  // 정답이름에 해당하는 사진
+				quiz_image_url=quiz_image.getUrl();				        // 정답 사진의 URL
+				if (quiz_image.getPersons().size() > 0) {
+					quiz_face_id = quiz_image.getPersons().get(0).getFaces().get(0).getFaceId();
+				}
+			}
+			selection_type="text";
+			selections[0]="지난 주에 촬영됨";
+			selections[1]="지난 주에 촬영되지 않음";
+			selections[2]=selections[3]=null;
+		}
+
+		/*
 		
 		// 사진들 중 오늘과 관련있는 사진은?  
 		else if (template_id==6){
@@ -323,8 +456,10 @@ public class QuizGen {
 					answer_number=1;
 				}
 				else{
-					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
-					answer_number=2;
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+						answer_number=2;
+					}
 				}
 			}
 		}
@@ -343,7 +478,9 @@ public class QuizGen {
 					selections[i]=selectedImages.get("right").get(0).getUrl();						// 정답
 				}
 				else{
-					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					}
 				}
 			}
 		}
@@ -360,10 +497,13 @@ public class QuizGen {
 					selections[i]=selectedImages.get("right").get(0).getUrl();	// 정답
 				}
 				else{
-					selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					if (wrongIdx < selectedImages.get("wrong").size()) {
+						selections[i]=selectedImages.get("wrong").get(wrongIdx++).getUrl();		// 오답
+					}
 				}
 			}
 		}
+		*/
 		this.quizToDB(template_id, solver_id, quiz_text, quiz_image_url,selection_type, selections, answer_number, quiz_face_id, selections_faces);
 		return true;
 	}

@@ -15,6 +15,7 @@ public class Quiz {
 	private ArrayList<Selection> selections = new ArrayList<Selection>();
 	
 	private int answer;
+	private int solved;
 	
 	public int getQuizId() {
 		return quizId;
@@ -48,6 +49,10 @@ public class Quiz {
 		return answer;
 	}
 	
+	public int getSolved() {
+		return solved;
+	}
+	
 	public void setQuizId(int quizId) {
 		this.quizId = quizId;
 	}
@@ -78,5 +83,9 @@ public class Quiz {
 	
 	public void setAnswer(int answer) {
 		this.answer = answer;
+	}
+	
+	public void setSolved(int solved) {
+		this.solved = solved;
 	}
 }

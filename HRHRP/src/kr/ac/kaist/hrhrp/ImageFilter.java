@@ -1,17 +1,11 @@
 package kr.ac.kaist.hrhrp;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import kr.ac.kaist.hrhrp.db.DBHandler;
-import kr.ac.kaist.hrhrp.util.JPEGExifExtraction;
 import kr.ac.kaist.hrhrp.util.PhotoFilter;
 
 public class ImageFilter {

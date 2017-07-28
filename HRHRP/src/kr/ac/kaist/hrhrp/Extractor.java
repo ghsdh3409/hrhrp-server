@@ -1,6 +1,5 @@
 package kr.ac.kaist.hrhrp;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,7 +31,7 @@ public class Extractor extends Init {
 		dbTemplate = new DBHandler();
 	}
 
-	private void close() {
+	public void close() {
 		dbTemplate.close();
 	}
 
@@ -49,8 +48,15 @@ public class Extractor extends Init {
 			System.out.println(person.getPersonName() + "\t" + person.getPersonId());
 			dbTemplate.insertPersonInfo(person.getPersonId(), person.getPersonName());
 			dbTemplate.insertPersonRelation(image.getImageOwnerId(), person.getPersonId(), null);
+
+			int isAutoDetected = 0;
+			if (person.getIsAutoDetected() != null && person.getIsAutoDetected()) {
+				isAutoDetected = 1;
+			} else {
+				isAutoDetected = 0;
+			}
 			dbTemplate.insertImagePerson(image.getUrl(), person.getPersonId(), face.getFaceId(), face.getPosition().getWidth(),
-					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY());
+					face.getPosition().getHeight(), face.getPosition().getCenterX(), face.getPosition().getCenterY(), isAutoDetected);
 		}
 
 		updateAddress(image);
@@ -61,7 +67,7 @@ public class Extractor extends Init {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		try {
 			int objectIdx = ObjectRecognizer.objectReconizer(image);
 			updateObject(objectIdx, image);
@@ -75,7 +81,7 @@ public class Extractor extends Init {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		dbTemplate.updateImageState(image.getUrl(), COMPLETE_STATE);
 
 	}
@@ -86,49 +92,92 @@ public class Extractor extends Init {
 	}
 
 	public ArrayList<Person> getNewPersons(String ownerId) {
-		ArrayList<String> newPersonIds = new ArrayList<String>();
-		newPersonIds = dbTemplate.selectNewPersons(ownerId);
-
 		ArrayList<Person> newPersons = new ArrayList<Person>();
+		newPersons = dbTemplate.selectNewPersons(ownerId);
 
-		for (String newPersonId : newPersonIds) {
-			Person newPerson = dbTemplate.selectFacesPerson(newPersonId);
-			newPersons.add(newPerson);
+		ArrayList<Person> newPersonsWithFace = new ArrayList<Person>();
+
+		for (Person newPerson : newPersons) {
+			ArrayList<Face> faces = dbTemplate.selectFacesByPerson(ownerId, newPerson);
+			if (faces.size() > 0) {
+				newPerson.setFaceVars(faces);
+				newPersonsWithFace.add(newPerson);
+			}
 		}
 
-		return newPersons;
+		return newPersonsWithFace;
 	}
 
-	private ArrayList<Person> getNewRelations(String ownerId) {
+	public ArrayList<Person> getNewRelations(String ownerId) {
 		ArrayList<String> newPersonIds = new ArrayList<String>();
 		newPersonIds = dbTemplate.selectNewPersonRelations(ownerId);
 
 		ArrayList<Person> newPersons = new ArrayList<Person>();
 
 		for (String newPersonId : newPersonIds) {
-			Person newPerson = new Person(newPersonId, KEY_PERSON_ID);
-			newPersons.add(newPerson);
+			try {
+				Person newPerson = new Person(newPersonId, KEY_PERSON_ID);
+				newPersons.add(newPerson);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		return newPersons;
 	}
 
-	public void updateNewPersons(String ownerId, String personId, String personName) {	
-		FaceRecognition fr = new FaceRecognition();
-		Person person = fr.personUpdate(personId, personName);
-		if (person != null) {
-			if (personId.equals(person.getPersonId())){ // New Person
-				System.out.println("NEW");
-				dbTemplate.updatePersonName(person.getPersonName(), person.getPersonId());
-			} else { // Existed User
-				System.out.println("EXISTED");
-				dbTemplate.updatePersonId(person.getPersonId(), personId);
-			}
+	public void updateUnknownPerson(String photoId, String personId) {
+		try {
+			System.out.println("UPDATE PERSON :: REMOVE UNKNOWN PERSON PHOTO");
+			dbTemplate.deletePhotoPerson(photoId, personId);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
 	}
 
-	public void updateNewRalations(String ownerId, String personId, String newRelation) {
+	public void updateNewPersonRelation(String photoId, String ownerId, String personId, String personName, String relation, String faceId) {
+		try {
+			boolean isAutoDetectedPerson = dbTemplate.selectIsPersonAutoDectected(photoId, personId);
+			Face face = new Face(faceId);
+
+			if (isAutoDetectedPerson == true) {
+				FaceRecognition fr = new FaceRecognition();
+				Person person = fr.personForAutoUpdate(personId, personName, face);
+				if (person != null) {
+					String correctPersonId = person.getPersonId();
+					String correctPersonName = person.getPersonName();
+
+					dbTemplate.insertPersonInfoWithUpdate(correctPersonId, correctPersonName);
+					dbTemplate.insertPersonRelationWithUpdate(ownerId, correctPersonId, relation);
+					dbTemplate.updatePhotoPersonByPhoto(photoId, correctPersonId, personId);
+				} else { //When the error is occured, the new user information is deleted.
+					System.out.println("UPDATE PERSON :: REMOVE INVALID NEW PERSON PHOTO");
+					dbTemplate.deletePhotoPerson(photoId, personId);
+				}
+			} else {
+				FaceRecognition fr = new FaceRecognition();
+				Person person = fr.personForTempUpdate(personId, personName);
+				if (person != null) {
+					if (personId.equals(person.getPersonId())){ // New Person
+						System.out.println("UPDATE PERSON :: NEW");
+						updateNewRalations(ownerId, person.getPersonId(), relation);
+						dbTemplate.updatePersonName(person.getPersonName(), person.getPersonId());
+					} else { // Existed User
+						System.out.println("UPDATE PERSON :: EXISTED");
+						updateNewRalations(ownerId, person.getPersonId(), relation);
+						dbTemplate.updatePersonId(person.getPersonId(), personId);
+					}
+				} else { //When the error is occured, the new user information is deleted.
+					System.out.println("UPDATE PERSON :: REMOVE INVALID NEW PERSON");
+					dbTemplate.deletePerson(personId);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void updateNewRalations(String ownerId, String personId, String newRelation) {
 		dbTemplate.updatePersonRelation(ownerId, personId, newRelation);
 	}
 
@@ -158,18 +207,18 @@ public class Extractor extends Init {
 	}
 
 	private int[] getColorInfo(Image image) throws Exception {
-			String filePath = image.getPath();
-			StartFeature sf = new StartFeature();
+		String filePath = image.getPath();
+		StartFeature sf = new StartFeature();
 
-			String[] tmpHSV = sf.startFromFile(filePath);
+		double[] tmpHSV = sf.startFromFile(filePath);
 
-			int hsv[] = new int[3];
-			hsv[0] = Integer.valueOf(tmpHSV[0].split("h;")[1]);
-			hsv[1] = Integer.valueOf(tmpHSV[1].split("s;")[1]);
-			hsv[2] = Integer.valueOf(tmpHSV[2].split("v;")[1]);
+		int hsv[] = new int[3];
+		hsv[0] = (int) tmpHSV[0];
+		hsv[1] = (int) tmpHSV[1];
+		hsv[2] = (int) tmpHSV[2];
 
-			return hsv;
-		
+		return hsv;
+
 	}
 
 	private void updateColor(int[] colorInfo, Image image) {

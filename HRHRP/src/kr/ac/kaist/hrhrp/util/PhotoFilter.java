@@ -8,33 +8,33 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
 
 public class PhotoFilter {
-	
+
 	public PhotoFilter(){
-		
+
 	}
-	
+
 	/*
-	// folderName Æú´õ¿¡ ÀÖ´Â »çÁøµé Áß¿¡¼­ °ñ¶ó³»±â!
+	// folderName í´ë”ì— ìˆëŠ” ì‚¬ì§„ë“¤ ì¤‘ì—ì„œ ê³¨ë¼ë‚´ê¸°!
 	public ArrayList<File> selectPhotos(String folderName){
-		// ¼±º°µÈ »çÁøµéÀ» ÀúÀåÇÏ´Â ¸®½ºÆ®
+		// ì„ ë³„ëœ ì‚¬ì§„ë“¤ì„ ì €ì¥í•˜ëŠ” ë¦¬ìŠ¤íŠ¸
 		ArrayList<File> selectedPhotoList = new ArrayList<File>();
-		
+
 		File folder=new File(folderName);
 		File[] files=folder.listFiles();
 		int numOfFiles=files.length;
 		System.out.println(numOfFiles+" images!");
 		File file1, file2;
 		double sim;
-		
-		// Ã¹ »çÁøÀº ¿ì¼± ÀúÀåÇÏ´Ù.
+
+		// ì²« ì‚¬ì§„ì€ ìš°ì„  ì €ì¥í•˜ë‹¤.
 		selectedPhotoList.add(files[0]);
-		
-		// °¢ »çÁøµé¿¡ ´ëÇØ...
+
+		// ê° ì‚¬ì§„ë“¤ì— ëŒ€í•´...
 		for (int i=0;i<numOfFiles-1;i++){
-			//System.out.println((i+1)+ "¹øÂ° photo!");
+			//System.out.println((i+1)+ "ë²ˆì§¸ photo!");
 			file1=new File(folderName+"/"+files[i].getName());
 			file2=new File(folderName+"/"+files[i+1].getName());
-			
+
 			sim=this.getCosSimilarity(file1, file2);
 			if(sim>0.8){
 				// Do Nothing!
@@ -43,17 +43,17 @@ public class PhotoFilter {
 				selectedPhotoList.add(file2);
 			}
 		}
-		
+
 		return selectedPhotoList;
 	}
-	*/
-	
-	// folderName Æú´õ¿¡ ÀÖ´Â »çÁøµé Áß¿¡¼­ °ñ¶ó³»±â!
+	 */
+
+	// folderName í´ë”ì— ìˆëŠ” ì‚¬ì§„ë“¤ ì¤‘ì—ì„œ ê³¨ë¼ë‚´ê¸°!
 	public ArrayList<String> selectPhotos(String srcFolderName, String destFolderName){
 		ArrayList<File> selectedPhotoList = new ArrayList<File>();
 		ArrayList<File> processedFileList = new ArrayList<File>();
 		ArrayList<String> selectedPhotoPathList = new ArrayList<String>(); //return value
-		
+
 		File folder=new File(srcFolderName);
 		File[] files=folder.listFiles();
 		if (files == null) {
@@ -66,24 +66,28 @@ public class PhotoFilter {
 		double sim;
 		boolean survived;
 		int current, other;
-		
+
 		//System.out.println(this.getCosSimilarity(new File("C:\\img\\b.jpg"), new File("C:\\img\\c.jpg")));
 		//System.out.println(this.getCosSimilarity(new File("C:\\img\\f.jpg"), new File("C:\\img\\g.jpg")));
 
 		for(int i=0;i<files.length;i++){
-			//System.out.println((i+1)+ "¹øÂ° photo!");
+			//System.out.println((i+1)+ "ë²ˆì§¸ photo!");
 			current=i;
 			file1=new File(srcFolderName+"/"+files[current].getName());
 			survived=true;
 			for(int j=1;j<=1;j++){
-				other=current-j;
-				if(other>-1){
-					file2=new File(srcFolderName+"/"+files[other].getName());
-					sim=this.getCosSimilarity(file1, file2);
-					if (sim>0.8){
-						survived=false;
-						break;
+				try {
+					other=current-j;
+					if(other>-1){
+						file2=new File(srcFolderName+"/"+files[other].getName());
+						sim=this.getCosSimilarity(file1, file2);
+						if (sim>0.7){
+							survived=false;
+							break;
+						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 			if(survived) selectedPhotoList.add(file1);
@@ -91,17 +95,17 @@ public class PhotoFilter {
 		}
 		selectedPhotoPathList = copySelectedPhotos(selectedPhotoList, destFolderName);
 		deletePhotos(processedFileList);
-		 
+
 		/*
 		File destFolder=new File(destFolderName);
 		for(File f: destFolder.listFiles()){
 			AbsolutePathList.add(f.getAbsolutePath());
 		}
-		*/
-		
+		 */
+
 		return selectedPhotoPathList;
 	}
-	
+
 	public void deletePhotos(ArrayList<File> deleteFileList){
 		for (File f : deleteFileList){
 			try {
@@ -112,7 +116,7 @@ public class PhotoFilter {
 			}
 		}
 	}
-	
+
 	public ArrayList<String> copySelectedPhotos(ArrayList<File> selectedPhotoList, String destFolderName){
 		ArrayList<String> copiedFilePath = new ArrayList<String>();
 		for (File f : selectedPhotoList){
@@ -128,56 +132,63 @@ public class PhotoFilter {
 		}
 		return copiedFilePath;
 	}
-	
+
 	public double[] getHistogram(File imageFile){
-		// °¢ ÀÌ¹ÌÁöµéÀÇ »ö»óÁ¤º¸¸¦ ´ã´Â º¤ÅÍ (512°¡Áö »öÀÇ Á¶ÇÕ)
+		System.out.println(imageFile.getPath());
+
+		// ê° ì´ë¯¸ì§€ë“¤ì˜ ìƒ‰ìƒì •ë³´ë¥¼ ë‹´ëŠ” ë²¡í„° (512ê°€ì§€ ìƒ‰ì˜ ì¡°í•©)
 		double [] vector=new double[512];
-		
+
 		BufferedImage image=null;
 		try {
 			image = ImageIO.read(imageFile);
+
+			if (image == null) {
+				System.out.println("PhotoFilter :: File is Wrong");
+				return vector;
+			}
+
+			//System.out.println(image.getWidth());
+			//System.out.println(image.getHeight());
+
+			double de=image.getWidth()*image.getHeight();
+
+			// ì‹¤ì œ ê°’ì„ ì €ì¥ (0~255)
+			int color,red,green,blue;
+
+			// quantized ë˜ëŠ” ê°’ì„ ì €ì¥ (0~8) 
+			int red_idx,green_idx,blue_idx;
+
+			for (int x=0;x<image.getWidth();x++){
+				for (int y=0;y<image.getHeight();y++){
+					color=image.getRGB(x, y);
+					red=(color & 0x00ff0000) >> 16;
+				green=(color & 0x0000ff00) >> 8;
+				blue=(color & 0x000000ff);
+
+				// quantize
+				red_idx=red/32;
+				green_idx=green/32;
+				blue_idx=blue/32;
+
+				vector[64*red_idx+8*green_idx+blue_idx]+=1/de;
+				}
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-                
-        //System.out.println(image.getWidth());
-        //System.out.println(image.getHeight());
-		double de=image.getWidth()*image.getHeight();
-        
-		// ½ÇÁ¦ °ªÀ» ÀúÀå (0~255)
-        int color,red,green,blue;
-        
-        // quantized µÇ´Â °ªÀ» ÀúÀå (0~8) 
-        int red_idx,green_idx,blue_idx;
-        
-        for (int x=0;x<image.getWidth();x++){
-        	for (int y=0;y<image.getHeight();y++){
-        		color=image.getRGB(x, y);
-        		red=(color & 0x00ff0000) >> 16;
-        		green=(color & 0x0000ff00) >> 8;
-        		blue=(color & 0x000000ff);
-        		
-        		// quantize
-        		red_idx=red/32;
-        		green_idx=green/32;
-        		blue_idx=blue/32;
-        		
-        		vector[64*red_idx+8*green_idx+blue_idx]+=1/de;
-        	}
-        }
-
 		return vector;
 	}
-	
+
 	public double getCosSimilarity(File file1, File file2){
 		double[] vector1=getHistogram(file1);
 		double[] vector2=getHistogram(file2);
-		
+
 		double innerProduct=0;		
 		double sqSum1=0;
 		double sqSum2=0;
-		
+
 		for (int i=0;i<vector1.length;i++){
 			innerProduct+=vector1[i]*vector2[i];
 			sqSum1+=vector1[i]*vector1[i];
@@ -185,17 +196,17 @@ public class PhotoFilter {
 		}
 		double norm1=Math.sqrt(sqSum1);
 		double norm2=Math.sqrt(sqSum2);
-		
+
 		//System.out.println("norm1 : "+norm1);
 		double cosSim=innerProduct/(norm1*norm2);
-		
+
 		return cosSim;
 	}
-	
+
 	public double getHistInterSimilarity(File file1, File file2){
 		double[] vector1=getHistogram(file1);
 		double[] vector2=getHistogram(file2);
-		
+
 		double sum1=0, sum2=0, minSum=0;
 		for(int i=0;i<vector1.length;i++){
 			sum1+=vector1[i];
@@ -207,7 +218,7 @@ public class PhotoFilter {
 				minSum+=vector2[i];
 			}
 		}
-		
+
 		if(sum1<=sum2){
 			return minSum/sum1;
 		}
